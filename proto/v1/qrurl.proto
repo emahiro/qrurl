@@ -1,0 +1,15 @@
+syntax="proto3";
+
+package qrurl.v1;
+
+message QrUrlRequest {
+  bytes image = 1;
+}
+
+message QrUrlResponse {
+  string url = 1;
+}
+
+service QrUrlService {
+  rpc PostCode(QrUrlRequest) returns (QrUrlResponse);
+}

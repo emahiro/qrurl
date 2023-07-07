@@ -13,7 +13,12 @@ type QrUrlService struct{}
 func (s *QrUrlService) PostCode(
 	ctx context.Context,
 	req *connect.Request[qrurlv1.PostCodeRequest],
-) {
+) (resp *connect.Response[qrurlv1.PostCodeResponse], err error) {
+	qrurlResp := &qrurlv1.PostCodeResponse{
+		Url: "test",
+	}
+	resp = connect.NewResponse(qrurlResp)
+	return resp, nil
 }
 
 func main() {

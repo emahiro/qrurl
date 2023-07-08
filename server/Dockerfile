@@ -1,7 +1,5 @@
 FROM golang:1.20.5-bullseye
 
-RUN apk update
-
 RUN mkdir /app
 
 WORKDIR /app

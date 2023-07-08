@@ -9,7 +9,7 @@ import (
 
 	"github.com/emahiro/qrurl/server/gen/proto/ping/v1/pingv1connect"
 	"github.com/emahiro/qrurl/server/gen/proto/qrurl/v1/qrurlv1connect"
-	"github.com/emahiro/qrurl/server/service.go"
+	"github.com/emahiro/qrurl/server/service"
 )
 
 const addr = ":8080"

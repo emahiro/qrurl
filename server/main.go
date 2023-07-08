@@ -7,6 +7,7 @@ import (
 
 	"golang.org/x/exp/slog"
 
+	"github.com/emahiro/qrurl/server/gen/proto/ping/v1/pingv1connect"
 	"github.com/emahiro/qrurl/server/gen/proto/qrurl/v1/qrurlv1connect"
 	"github.com/emahiro/qrurl/server/service.go"
 )
@@ -20,6 +21,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle(qrurlv1connect.NewQrUrlServiceHandler(&service.QrUrlService{}))
+	mux.Handle(pingv1connect.NewPingServiceHandler(&service.PingService{}))
 	server := &http.Server{
 		Addr:    addr,
 		Handler: mux,

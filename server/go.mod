@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/bufbuild/connect-go v1.9.0
-	github.com/makiuchi-d/gozxing v0.1.1
+	github.com/makiuchi-d/gozxing v0.1.2-0.20230218072048-d8563176fedd
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
 	google.golang.org/protobuf v1.31.0
 )

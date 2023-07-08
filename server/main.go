@@ -6,9 +6,10 @@ import (
 	"net/http"
 
 	"github.com/bufbuild/connect-go"
+	"golang.org/x/exp/slog"
+
 	qrurlv1 "github.com/emahiro/qrurl/server/gen/proto/qrurl/v1"
 	"github.com/emahiro/qrurl/server/gen/proto/qrurl/v1/qrurlv1connect"
-	"golang.org/x/exp/slog"
 )
 
 const addr = ":8080"

@@ -10,6 +10,7 @@ import (
 	"github.com/bufbuild/connect-go"
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
+	"golang.org/x/exp/slog"
 
 	qrurlv1 "github.com/emahiro/qrurl/server/gen/proto/qrurl/v1"
 )
@@ -24,17 +25,20 @@ func (s *QrUrlService) PostCode(
 	buf := bytes.NewBuffer(req.Msg.Image)
 	img, _, err := image.Decode(buf)
 	if err != nil {
+		slog.ErrorCtx(ctx, "image.Decode", "err", err)
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	bmp, err := gozxing.NewBinaryBitmapFromImage(img)
 	if err != nil {
+		slog.ErrorCtx(ctx, "NewBinaryBitmapFromImage", "err", err)
 		return nil, connect.NewError(connect.CodeUnknown, err)
 	}
 
 	reader := qrcode.NewQRCodeReader()
 	result, err := reader.Decode(bmp, nil)
 	if err != nil {
+		slog.ErrorCtx(ctx, "reader.Decode", "err", err)
 		return nil, connect.NewError(connect.CodeUnknown, err)
 	}
 

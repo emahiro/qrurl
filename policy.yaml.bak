@@ -1,0 +1,4 @@
+bindings:
+- members:
+  - $Members
+  role: roles/run.invoker

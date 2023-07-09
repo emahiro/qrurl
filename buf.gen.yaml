@@ -5,8 +5,8 @@ managed:
     default: github.com/emahiro/qrurl/server/gen
 plugins:
   - plugin: go
-    out: gen
+    out: server/gen
     opt: paths=source_relative
   - plugin: connect-go
-    out: gen
+    out: server/gen
     opt: paths=source_relative

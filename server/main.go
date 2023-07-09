@@ -7,8 +7,11 @@ import (
 
 	"golang.org/x/exp/slog"
 
+	"github.com/bufbuild/connect-go"
+
 	"github.com/emahiro/qrurl/server/gen/proto/ping/v1/pingv1connect"
 	"github.com/emahiro/qrurl/server/gen/proto/qrurl/v1/qrurlv1connect"
+	"github.com/emahiro/qrurl/server/intercepter"
 	"github.com/emahiro/qrurl/server/service"
 )
 
@@ -19,9 +22,13 @@ func main() {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
+	intercepters := connect.WithInterceptors(
+		intercepter.NewRequestLogIntercepter(),
+	)
+
 	mux := http.NewServeMux()
-	mux.Handle(qrurlv1connect.NewQrUrlServiceHandler(&service.QrUrlService{}))
-	mux.Handle(pingv1connect.NewPingServiceHandler(&service.PingService{}))
+	mux.Handle(qrurlv1connect.NewQrUrlServiceHandler(&service.QrUrlService{}, intercepters))
+	mux.Handle(pingv1connect.NewPingServiceHandler(&service.PingService{}, intercepters))
 	server := &http.Server{
 		Addr:    addr,
 		Handler: mux,

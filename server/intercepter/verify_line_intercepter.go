@@ -1,0 +1,41 @@
+package intercepter
+
+import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"io"
+	"net/http"
+	"os"
+)
+
+var lineMessageChannelSecret = os.Getenv("")
+
+func VerifyLine() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			body := r.Body
+			b, err := io.ReadAll(body)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			defer body.Close()
+
+			signagure := r.Header.Get("x-line-signature")
+			decoded, err := base64.StdEncoding.DecodeString(signagure)
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			hash := hmac.New(sha256.New, []byte(lineMessageChannelSecret))
+			hash.Write(b)
+			verified := hmac.Equal(decoded, hash.Sum(nil))
+			if !verified {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}

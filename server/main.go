@@ -26,6 +26,7 @@ func main() {
 	router := chi.NewRouter()
 	// 標準の http handler
 	router.Group(func(r chi.Router) {
+		r.Use(intercepter.VerifyLine())
 		r.HandleFunc("/v1/webhook/line", handler.LineWebHookHandler)
 	})
 

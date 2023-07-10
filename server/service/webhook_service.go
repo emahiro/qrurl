@@ -12,7 +12,7 @@ import (
 
 type LineWebhookService struct{}
 
-func (s *LineWebhookService) LineWebhook(ctx context.Context, req *connect.Request[linewebhookv1.LineWebhookRequest]) (*connect.Response[linewebhookv1.LineWebhookResponse], error) {
+func (s *LineWebhookService) Webhook(ctx context.Context, req *connect.Request[linewebhookv1.LineWebhookRequest]) (*connect.Response[linewebhookv1.LineWebhookResponse], error) {
 	body := req.Msg
 	slog.InfoCtx(ctx, "request", fmt.Sprintf("%v", body))
 	resp := &linewebhookv1.LineWebhookResponse{

@@ -33,14 +33,14 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// LineWebhookServiceLineWebhookProcedure is the fully-qualified name of the LineWebhookService's
-	// LineWebhook RPC.
-	LineWebhookServiceLineWebhookProcedure = "/webhook.v1.LineWebhookService/LineWebhook"
+	// LineWebhookServiceWebhookProcedure is the fully-qualified name of the LineWebhookService's
+	// Webhook RPC.
+	LineWebhookServiceWebhookProcedure = "/webhook.v1.LineWebhookService/Webhook"
 )
 
 // LineWebhookServiceClient is a client for the webhook.v1.LineWebhookService service.
 type LineWebhookServiceClient interface {
-	LineWebhook(context.Context, *connect_go.Request[v1.LineWebhookRequest]) (*connect_go.Response[v1.LineWebhookResponse], error)
+	Webhook(context.Context, *connect_go.Request[v1.LineWebhookRequest]) (*connect_go.Response[v1.LineWebhookResponse], error)
 }
 
 // NewLineWebhookServiceClient constructs a client for the webhook.v1.LineWebhookService service. By
@@ -53,9 +53,9 @@ type LineWebhookServiceClient interface {
 func NewLineWebhookServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) LineWebhookServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &lineWebhookServiceClient{
-		lineWebhook: connect_go.NewClient[v1.LineWebhookRequest, v1.LineWebhookResponse](
+		webhook: connect_go.NewClient[v1.LineWebhookRequest, v1.LineWebhookResponse](
 			httpClient,
-			baseURL+LineWebhookServiceLineWebhookProcedure,
+			baseURL+LineWebhookServiceWebhookProcedure,
 			opts...,
 		),
 	}
@@ -63,17 +63,17 @@ func NewLineWebhookServiceClient(httpClient connect_go.HTTPClient, baseURL strin
 
 // lineWebhookServiceClient implements LineWebhookServiceClient.
 type lineWebhookServiceClient struct {
-	lineWebhook *connect_go.Client[v1.LineWebhookRequest, v1.LineWebhookResponse]
+	webhook *connect_go.Client[v1.LineWebhookRequest, v1.LineWebhookResponse]
 }
 
-// LineWebhook calls webhook.v1.LineWebhookService.LineWebhook.
-func (c *lineWebhookServiceClient) LineWebhook(ctx context.Context, req *connect_go.Request[v1.LineWebhookRequest]) (*connect_go.Response[v1.LineWebhookResponse], error) {
-	return c.lineWebhook.CallUnary(ctx, req)
+// Webhook calls webhook.v1.LineWebhookService.Webhook.
+func (c *lineWebhookServiceClient) Webhook(ctx context.Context, req *connect_go.Request[v1.LineWebhookRequest]) (*connect_go.Response[v1.LineWebhookResponse], error) {
+	return c.webhook.CallUnary(ctx, req)
 }
 
 // LineWebhookServiceHandler is an implementation of the webhook.v1.LineWebhookService service.
 type LineWebhookServiceHandler interface {
-	LineWebhook(context.Context, *connect_go.Request[v1.LineWebhookRequest]) (*connect_go.Response[v1.LineWebhookResponse], error)
+	Webhook(context.Context, *connect_go.Request[v1.LineWebhookRequest]) (*connect_go.Response[v1.LineWebhookResponse], error)
 }
 
 // NewLineWebhookServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -83,9 +83,9 @@ type LineWebhookServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewLineWebhookServiceHandler(svc LineWebhookServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
 	mux := http.NewServeMux()
-	mux.Handle(LineWebhookServiceLineWebhookProcedure, connect_go.NewUnaryHandler(
-		LineWebhookServiceLineWebhookProcedure,
-		svc.LineWebhook,
+	mux.Handle(LineWebhookServiceWebhookProcedure, connect_go.NewUnaryHandler(
+		LineWebhookServiceWebhookProcedure,
+		svc.Webhook,
 		opts...,
 	))
 	return "/webhook.v1.LineWebhookService/", mux
@@ -94,6 +94,6 @@ func NewLineWebhookServiceHandler(svc LineWebhookServiceHandler, opts ...connect
 // UnimplementedLineWebhookServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedLineWebhookServiceHandler struct{}
 
-func (UnimplementedLineWebhookServiceHandler) LineWebhook(context.Context, *connect_go.Request[v1.LineWebhookRequest]) (*connect_go.Response[v1.LineWebhookResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("webhook.v1.LineWebhookService.LineWebhook is not implemented"))
+func (UnimplementedLineWebhookServiceHandler) Webhook(context.Context, *connect_go.Request[v1.LineWebhookRequest]) (*connect_go.Response[v1.LineWebhookResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("webhook.v1.LineWebhookService.Webhook is not implemented"))
 }

@@ -2,21 +2,15 @@ package service
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/bufbuild/connect-go"
-	"golang.org/x/exp/slog"
-
-	linewebhookv1 "github.com/emahiro/qrurl/server/gen/proto/webhook/v1"
+	webhookv1 "github.com/emahiro/qrurl/server/gen/proto/webhook/v1"
 )
 
 type LineWebhookService struct{}
 
-func (s *LineWebhookService) Webhook(ctx context.Context, req *connect.Request[linewebhookv1.LineWebhookRequest]) (*connect.Response[linewebhookv1.LineWebhookResponse], error) {
-	body := req.Msg
-	slog.InfoCtx(ctx, "request", fmt.Sprintf("%v", body))
-	resp := &linewebhookv1.LineWebhookResponse{
+func (s *LineWebhookService) Line(ctx context.Context, req *webhookv1.LineWebhookRequest) (*webhookv1.LineWebhookResponse, error) {
+	resp := &webhookv1.LineWebhookResponse{
 		Text: "Ok",
 	}
-	return connect.NewResponse(resp), nil
+	return resp, nil
 }

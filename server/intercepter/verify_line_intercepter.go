@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-var lineMessageChannelSecret = os.Getenv("")
+var lineMessageChannelSecret = os.Getenv("LINE_MESSAGE_CHANNEL_SECRET")
 
 func VerifyLine() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

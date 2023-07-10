@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -12,6 +11,7 @@ import (
 
 	"github.com/emahiro/qrurl/server/gen/proto/ping/v1/pingv1connect"
 	"github.com/emahiro/qrurl/server/gen/proto/qrurl/v1/qrurlv1connect"
+	"github.com/emahiro/qrurl/server/handler"
 	"github.com/emahiro/qrurl/server/intercepter"
 	"github.com/emahiro/qrurl/server/service"
 )
@@ -26,17 +26,7 @@ func main() {
 	router := chi.NewRouter()
 	// 標準の http handler
 	router.Group(func(r chi.Router) {
-		r.HandleFunc("/v1/webhook/line", func(w http.ResponseWriter, r *http.Request) {
-			v := map[string]any{}
-			if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
-				slog.ErrorCtx(ctx, "request body parse error", err)
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-			slog.InfoCtx(r.Context(), "request body", "body", fmt.Sprintf("%+v", v))
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("ok"))
-		})
+		r.HandleFunc("/v1/webhook/line", handler.LineWebHookHandler)
 	})
 
 	// for GRPC

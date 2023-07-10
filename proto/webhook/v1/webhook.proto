@@ -30,7 +30,3 @@ message LineWebhookSource {
 message LineWebhookResponse{
   string text = 1;
 }
-
-service LineWebhookService {
-  rpc Webhook(LineWebhookRequest) returns (LineWebhookResponse);
-}

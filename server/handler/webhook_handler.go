@@ -14,7 +14,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 
 	v := webhookv1.LineWebhookRequest{}
 	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
-		slog.ErrorCtx(ctx, "request body parse error", err)
+		slog.ErrorCtx(ctx, "request body parse error", "err", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

@@ -3,7 +3,7 @@ syntax="proto3";
 package webhook.v1;
 
 message LineWebhookRequest {
-  string description = 1;
+  string destination = 1;
   repeated LineWebhookEvent events = 2;
 }
 

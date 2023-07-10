@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 
 	"golang.org/x/exp/slog"
@@ -13,10 +14,15 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	v := webhookv1.LineWebhookRequest{}
-	if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
-		slog.ErrorCtx(ctx, "request body parse error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
+	decorder := json.NewDecoder(r.Body)
+	for {
+		if err := decorder.Decode(&v); err == io.EOF {
+			break
+		} else if err != nil {
+			slog.ErrorCtx(ctx, "request body parse error", "err", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 	}
 
 	// MessageID から Messsage の詳細を取得

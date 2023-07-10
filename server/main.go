@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"golang.org/x/exp/slog"
-
 	"github.com/bufbuild/connect-go"
 	"github.com/go-chi/chi/v5"
+	"golang.org/x/exp/slog"
 
 	"github.com/emahiro/qrurl/server/gen/proto/ping/v1/pingv1connect"
 	"github.com/emahiro/qrurl/server/gen/proto/qrurl/v1/qrurlv1connect"

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -31,6 +32,17 @@ func main() {
 	mux.Handle(qrurlv1connect.NewQrUrlServiceHandler(&service.QrUrlService{}, intercepters))
 	mux.Handle(pingv1connect.NewPingServiceHandler(&service.PingService{}, intercepters))
 	mux.Handle(webhookv1connect.NewLineWebhookServiceHandler(&service.LineWebhookService{}, intercepters))
+	mux.HandleFunc("/v1/webhook/line", func(w http.ResponseWriter, r *http.Request) {
+		v := map[string]any{}
+		if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
+			slog.ErrorCtx(ctx, "request body parse error", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		slog.InfoCtx(r.Context(), "request body", "body", fmt.Sprintf("%+v", v))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	})
 	server := &http.Server{
 		Addr:    addr,
 		Handler: mux,

@@ -19,6 +19,13 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// MessageID から Messsage の詳細を取得
+	// 画像の場合のみ対応
+	// 画像を byte に変換
+	// lib.DecodeQrCode を呼び出す。
+	// URL を取得
+	// ユーザーへの応答をする
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("ok"))
 }

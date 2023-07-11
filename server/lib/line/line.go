@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"os"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
+	"golang.org/x/exp/slog"
 
 	"github.com/emahiro/qrurl/server/lib/jwt"
 )
@@ -33,6 +35,8 @@ func PostChannelAccessToken() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	slog.InfoCtx(context.Background(), "token", "jwt", token)
+
 	rb := PostChannelAccessTokenRequest{
 		GrantType:           "client_credentials",
 		ClientAssertionType: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
@@ -52,6 +56,17 @@ func PostChannelAccessToken() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= http.StatusBadRequest {
+		bb, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return "", err
+		}
+		slog.InfoCtx(context.Background(), "token response body", "err", string(bb))
+		return "", errors.New(string(bb))
+	}
+
 	var v PostChannelAccessTokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
 		return "", err

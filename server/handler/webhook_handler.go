@@ -33,6 +33,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	slog.InfoCtx(ctx, "post channel access token", "token", token)
 
 	var result string
 

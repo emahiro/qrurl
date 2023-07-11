@@ -79,6 +79,8 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	slog.InfoCtx(ctx, "result", "result", result)
+
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(result))
 }

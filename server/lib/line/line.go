@@ -1,13 +1,14 @@
 package line
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"golang.org/x/exp/slog"
@@ -37,17 +38,13 @@ func PostChannelAccessToken() (string, error) {
 	}
 	slog.InfoCtx(context.Background(), "token", "jwt", token)
 
-	rb := PostChannelAccessTokenRequest{
-		GrantType:           "client_credentials",
-		ClientAssertionType: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-		ClientAssertion:     token,
-	}
-	b, err := json.Marshal(rb)
-	if err != nil {
-		return "", err
-	}
+	form := url.Values{}
+	form.Set("grant_type", "client_credentials")
+	form.Add("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+	form.Add("client_assertion", token)
+	b := strings.NewReader(form.Encode())
 
-	req, err := http.NewRequest(http.MethodPost, "https://api.line.me/oauth2/v2.1/token", bytes.NewBuffer(b))
+	req, err := http.NewRequest(http.MethodPost, "https://api.line.me/oauth2/v2.1/token", b)
 	if err != nil {
 		return "", err
 	}

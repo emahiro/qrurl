@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"os"
+
+	"github.com/line/line-bot-sdk-go/v7/linebot"
 
 	"github.com/emahiro/qrurl/server/lib/jwt"
 )
@@ -70,4 +73,20 @@ func NewLineClient(at string) *LineClient {
 	}
 }
 
-func (c *LineClient) GetMessageContent(ctx context.Context, messageID int64) {}
+func (c *LineClient) GetMessageContent(ctx context.Context, messageID string) ([]byte, error) {
+	bot, err := linebot.New(c.secret, c.at)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := bot.GetMessageContent(messageID).Do()
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Content.Close()
+
+	b, err := io.ReadAll(resp.Content)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}

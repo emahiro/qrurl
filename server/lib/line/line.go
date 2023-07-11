@@ -2,8 +2,12 @@ package line
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
+	"os"
+
+	"github.com/emahiro/qrurl/server/lib/jwt"
 )
 
 // Described at https://developers.line.biz/ja/reference/messaging-api/#issue-channel-access-token-v2-1
@@ -22,10 +26,14 @@ type PostChannelAccessTokenResponse struct {
 
 // PostChannelAccessToken はチャンネルアクセストークンを取得する。
 func PostChannelAccessToken() (string, error) {
+	token, err := jwt.CreateToken()
+	if err != nil {
+		return "", err
+	}
 	rb := PostChannelAccessTokenRequest{
 		GrantType:           "client_credentials",
 		ClientAssertionType: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-		ClientAssertion:     "",
+		ClientAssertion:     token,
 	}
 	b, err := json.Marshal(rb)
 	if err != nil {
@@ -47,3 +55,19 @@ func PostChannelAccessToken() (string, error) {
 	}
 	return v.AccessToken, nil
 }
+
+type LineClient struct {
+	client *http.Client
+	at     string
+	secret string
+}
+
+func NewLineClient(at string) *LineClient {
+	return &LineClient{
+		client: http.DefaultClient,
+		at:     at,
+		secret: os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"),
+	}
+}
+
+func (c *LineClient) GetMessageContent(ctx context.Context, messageID int64) {}

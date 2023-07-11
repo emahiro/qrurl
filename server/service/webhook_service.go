@@ -9,6 +9,7 @@ import (
 type LineWebhookService struct{}
 
 func (s *LineWebhookService) Line(ctx context.Context, req *webhookv1.LineWebhookRequest) (*webhookv1.LineWebhookResponse, error) {
+
 	resp := &webhookv1.LineWebhookResponse{
 		Text: "Ok",
 	}

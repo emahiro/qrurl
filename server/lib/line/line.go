@@ -59,26 +59,22 @@ func PostChannelAccessToken() (string, error) {
 	return v.AccessToken, nil
 }
 
-type LineClient struct {
-	client *http.Client
-	at     string
-	secret string
+type LineBot struct {
+	bot *linebot.Client
 }
 
-func NewLineClient(at string) *LineClient {
-	return &LineClient{
-		client: http.DefaultClient,
-		at:     at,
-		secret: os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"),
-	}
-}
-
-func (c *LineClient) GetMessageContent(ctx context.Context, messageID string) ([]byte, error) {
-	bot, err := linebot.New(c.secret, c.at)
+func NewLineBot(at string) (*LineBot, error) {
+	bot, err := linebot.New(at, os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"))
 	if err != nil {
 		return nil, err
 	}
-	resp, err := bot.GetMessageContent(messageID).Do()
+	return &LineBot{
+		bot: bot,
+	}, nil
+}
+
+func (c *LineBot) GetMessageContent(ctx context.Context, messageID string) ([]byte, error) {
+	resp, err := c.bot.GetMessageContent(messageID).Do()
 	if err != nil {
 		return nil, err
 	}

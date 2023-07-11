@@ -30,7 +30,7 @@ func CreateToken() (string, error) {
 	_ = t.Set(jwt.SubjectKey, channelID)
 	_ = t.Set(jwt.AudienceKey, "https://api.line.me/")
 	_ = t.Set(jwt.ExpirationKey, now.Add(30*time.Minute).Unix())
-	_ = t.Set("token_exp", now.Add(24*time.Hour).Unix())
+	_ = t.Set("token_exp", 60*60*24*30) // 1month
 
 	buf, err := json.MarshalIndent(t, "", "  ")
 	if err != nil {

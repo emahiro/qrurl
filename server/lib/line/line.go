@@ -64,7 +64,7 @@ type LineBot struct {
 }
 
 func NewLineBot(at string) (*LineBot, error) {
-	bot, err := linebot.New(at, os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"))
+	bot, err := linebot.New(os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"), at)
 	if err != nil {
 		return nil, err
 	}

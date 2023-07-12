@@ -23,18 +23,18 @@ type LineWebhookRequest struct {
 }
 
 type LineWebhookEvent struct {
-	Type    string              `json:"type"`
-	Message *LineWebhookMessage `json:"message"`
-}
-
-type LineWebhookMessage struct {
 	Type           string             `json:"type"`
-	Id             string             `json:"id"`
-	Text           string             `json:"text"`
+	Message        *LineMessage       `json:"message"`
 	ReplyToken     string             `json:"replyToken"`
 	WebhookEventId string             `json:"webhookEventId"`
-	Timestamp      int32              `json:"timestamp"`
+	Timestamp      int64              `json:"timestamp"`
 	Source         *LineWebhookSource `json:"source"`
+}
+
+type LineMessage struct {
+	Type string `json:"type"`
+	Id   string `json:"id"`
+	Text string `json:"text"`
 }
 
 type LineWebhookSource struct {
@@ -123,4 +123,14 @@ func (c *LineBot) GetMessageContent(ctx context.Context, messageID string) ([]by
 		return nil, err
 	}
 	return b, nil
+}
+
+func (c *LineBot) ReplyMessage(ctx context.Context, replyToken string, text string) error {
+	messages := []linebot.SendingMessage{
+		linebot.NewTextMessage(text),
+	}
+	if _, err := c.bot.ReplyMessage(replyToken, messages...).Do(); err != nil {
+		return err
+	}
+	return nil
 }

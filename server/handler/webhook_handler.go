@@ -7,6 +7,8 @@ import (
 
 	"golang.org/x/exp/slog"
 
+	"github.com/line/line-bot-sdk-go/v7/linebot"
+
 	"github.com/emahiro/qrurl/server/lib"
 	"github.com/emahiro/qrurl/server/lib/line"
 )
@@ -28,13 +30,6 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// MessageID から Messsage の詳細を取得
-	// 画像の場合のみ対応
-	// 画像を byte に変換
-	// lib.DecodeQrCode を呼び出す。
-	// URL を取得
-	// ユーザーへの応答をする
-
 	v := line.LineWebhookRequest{}
 	decorder := json.NewDecoder(r.Body)
 	for {
@@ -50,12 +45,14 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 	var result string
 	for _, event := range v.Events {
 		slog.InfoCtx(ctx, "event", "event", event)
-		m := event.Message
-		switch m.Type {
-		case "text":
-			result = m.Text
-		case "image":
-			b, err := bot.GetMessageContent(ctx, m.Id)
+		message := event.Message
+		replyToken := event.ReplyToken
+
+		switch linebot.MessageType(message.Type) {
+		case linebot.MessageTypeText:
+			result = message.Text
+		case linebot.MessageTypeImage:
+			b, err := bot.GetMessageContent(ctx, message.Id)
 			if err != nil {
 				slog.ErrorCtx(ctx, "get message content error", "err", err)
 				w.WriteHeader(http.StatusInternalServerError)
@@ -70,8 +67,15 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			result = content
 		default:
-			slog.ErrorCtx(ctx, "not supported type", "type", m.Type)
+			slog.ErrorCtx(ctx, "not supported type", "type", message.Type)
 			result = "not supported"
+		}
+
+		// reply message
+		if err := bot.ReplyMessage(ctx, replyToken, result); err != nil {
+			slog.ErrorCtx(ctx, "reply message error", "err", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 	}
 

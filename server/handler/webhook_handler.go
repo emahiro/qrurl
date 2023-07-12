@@ -50,12 +50,14 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 	var result string
 	for _, event := range v.Events {
 		slog.InfoCtx(ctx, "event", "event", event)
-		m := event.Message
-		switch m.Type {
+		message := event.Message
+		mType := message.Type
+
+		switch mType {
 		case "text":
-			result = m.Text
+			result = message.Text
 		case "image":
-			b, err := bot.GetMessageContent(ctx, m.Id)
+			b, err := bot.GetMessageContent(ctx, message.Id)
 			if err != nil {
 				slog.ErrorCtx(ctx, "get message content error", "err", err)
 				w.WriteHeader(http.StatusInternalServerError)
@@ -70,7 +72,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			result = content
 		default:
-			slog.ErrorCtx(ctx, "not supported type", "type", m.Type)
+			slog.ErrorCtx(ctx, "not supported type", "type", mType)
 			result = "not supported"
 		}
 	}

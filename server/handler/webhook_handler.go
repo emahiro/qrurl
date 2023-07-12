@@ -16,20 +16,6 @@ import (
 func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	token, err := line.PostChannelAccessToken()
-	if err != nil {
-		slog.ErrorCtx(ctx, "post channel access token error", "err", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	bot, err := line.NewLineBot(token)
-	if err != nil {
-		slog.ErrorCtx(ctx, "new line bot error", "err", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	v := line.LineWebhookRequest{}
 	decorder := json.NewDecoder(r.Body)
 	for {
@@ -52,7 +38,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		case linebot.MessageTypeText:
 			result = message.Text
 		case linebot.MessageTypeImage:
-			b, err := bot.GetMessageContent(ctx, message.Id)
+			b, err := line.GetMessageContent(ctx, message.Id)
 			if err != nil {
 				slog.ErrorCtx(ctx, "get message content error", "err", err)
 				w.WriteHeader(http.StatusInternalServerError)
@@ -72,7 +58,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// reply message
-		if err := bot.ReplyMessage(ctx, replyToken, result); err != nil {
+		if err := line.ReplyMessage(ctx, replyToken, result); err != nil {
 			slog.ErrorCtx(ctx, "reply message error", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return

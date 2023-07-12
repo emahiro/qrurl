@@ -23,15 +23,15 @@ type LineWebhookRequest struct {
 }
 
 type LineWebhookEvent struct {
-	Type           string              `json:"type"`
-	Message        *LineWebhookMessage `json:"message"`
-	ReplyToken     string              `json:"replyToken"`
-	WebhookEventId string              `json:"webhookEventId"`
-	Timestamp      int32               `json:"timestamp"`
-	Source         *LineWebhookSource  `json:"source"`
+	Type           string             `json:"type"`
+	Message        *LineMessage       `json:"message"`
+	ReplyToken     string             `json:"replyToken"`
+	WebhookEventId string             `json:"webhookEventId"`
+	Timestamp      int32              `json:"timestamp"`
+	Source         *LineWebhookSource `json:"source"`
 }
 
-type LineWebhookMessage struct {
+type LineMessage struct {
 	Type string `json:"type"`
 	Id   string `json:"id"`
 	Text string `json:"text"`

@@ -7,7 +7,6 @@ import (
 
 	"golang.org/x/exp/slog"
 
-	"github.com/line/line-bot-sdk-go/linebot"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 
 	"github.com/emahiro/qrurl/server/lib"
@@ -49,7 +48,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		message := event.Message
 		replyToken := event.ReplyToken
 
-		switch message.Type {
+		switch linebot.MessageType(message.Type) {
 		case linebot.MessageTypeText:
 			result = message.Text
 		case linebot.MessageTypeImage:

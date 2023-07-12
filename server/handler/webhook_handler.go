@@ -36,14 +36,6 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 	// URL を取得
 	// ユーザーへの応答をする
 
-	b, err := io.ReadAll(r.Body)
-	if err != nil {
-		slog.ErrorCtx(ctx, "request body read error", "err", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	slog.InfoCtx(ctx, "raw request body", "body", string(b))
-
 	v := webhookv1.LineWebhookRequest{}
 	decorder := json.NewDecoder(r.Body)
 	for {

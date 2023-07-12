@@ -1,6 +1,7 @@
 package intercepter
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
@@ -13,16 +14,18 @@ var lineMessageChannelSecret = os.Getenv("LINE_MESSAGE_CHANNEL_SECRET")
 
 func VerifyLine() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			body := r.Body
-			b, err := io.ReadAll(body)
+		return http.HandlerFunc(func(w http.ResponseWriter, origReq *http.Request) {
+			ctx := origReq.Context()
+
+			copyReq := origReq.Clone(ctx)
+			b, err := io.ReadAll(copyReq.Body)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
-			defer body.Close()
+			defer copyReq.Body.Close()
 
-			signagure := r.Header.Get("x-line-signature")
+			signagure := copyReq.Header.Get("x-line-signature")
 			decoded, err := base64.StdEncoding.DecodeString(signagure)
 			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
@@ -35,7 +38,9 @@ func VerifyLine() func(http.Handler) http.Handler {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
-			next.ServeHTTP(w, r)
+
+			origReq.Body = io.NopCloser(bytes.NewBuffer(b))
+			next.ServeHTTP(w, origReq)
 		})
 	}
 }

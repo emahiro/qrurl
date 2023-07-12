@@ -52,7 +52,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		slog.InfoCtx(ctx, "event", "event", event)
 		message := event.Message
 		mType := message.Type
-
+		replyToken := event.ReplyToken
 		switch mType {
 		case "text":
 			result = message.Text

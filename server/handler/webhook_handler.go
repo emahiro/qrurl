@@ -28,13 +28,6 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// MessageID から Messsage の詳細を取得
-	// 画像の場合のみ対応
-	// 画像を byte に変換
-	// lib.DecodeQrCode を呼び出す。
-	// URL を取得
-	// ユーザーへの応答をする
-
 	v := line.LineWebhookRequest{}
 	decorder := json.NewDecoder(r.Body)
 	for {
@@ -76,6 +69,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 			result = "not supported"
 		}
 
+		// reply message
 		if err := bot.ReplyMessage(ctx, replyToken, result); err != nil {
 			slog.ErrorCtx(ctx, "reply message error", "err", err)
 			w.WriteHeader(http.StatusInternalServerError)

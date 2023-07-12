@@ -51,9 +51,8 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 	for _, event := range v.Events {
 		slog.InfoCtx(ctx, "event", "event", event)
 		message := event.Message
-		mType := message.Type
 		replyToken := event.ReplyToken
-		switch mType {
+		switch message.Type {
 		case "text":
 			result = message.Text
 		case "image":
@@ -72,7 +71,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			result = content
 		default:
-			slog.ErrorCtx(ctx, "not supported type", "type", mType)
+			slog.ErrorCtx(ctx, "not supported type", "type", message.Type)
 			result = "not supported"
 		}
 	}

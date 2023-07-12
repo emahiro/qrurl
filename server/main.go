@@ -13,6 +13,7 @@ import (
 	"github.com/emahiro/qrurl/server/gen/proto/qrurl/v1/qrurlv1connect"
 	"github.com/emahiro/qrurl/server/handler"
 	"github.com/emahiro/qrurl/server/intercepter"
+	"github.com/emahiro/qrurl/server/lib/line"
 	"github.com/emahiro/qrurl/server/service"
 )
 
@@ -22,6 +23,12 @@ func main() {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	// init line
+	if err := line.NewBot(ctx); err != nil {
+		slog.ErrorCtx(ctx, "failed to init line bot", "err", err)
+		panic(err)
+	}
 
 	router := chi.NewRouter()
 	// 標準の http handler

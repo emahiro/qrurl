@@ -27,7 +27,7 @@ type LineWebhookEvent struct {
 	Message        *LineMessage       `json:"message"`
 	ReplyToken     string             `json:"replyToken"`
 	WebhookEventId string             `json:"webhookEventId"`
-	Timestamp      int32              `json:"timestamp"`
+	Timestamp      int64              `json:"timestamp"`
 	Source         *LineWebhookSource `json:"source"`
 }
 

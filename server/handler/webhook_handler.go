@@ -52,6 +52,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		slog.InfoCtx(ctx, "event", "event", event)
 		message := event.Message
 		replyToken := event.ReplyToken
+
 		switch message.Type {
 		case "text":
 			result = message.Text
@@ -73,6 +74,12 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		default:
 			slog.ErrorCtx(ctx, "not supported type", "type", message.Type)
 			result = "not supported"
+		}
+
+		if err := bot.ReplyMessage(ctx, replyToken, result); err != nil {
+			slog.ErrorCtx(ctx, "reply message error", "err", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 	}
 

@@ -124,3 +124,13 @@ func (c *LineBot) GetMessageContent(ctx context.Context, messageID string) ([]by
 	}
 	return b, nil
 }
+
+func (c *LineBot) ReplyMessage(ctx context.Context, replyToken string, text string) error {
+	messages := []linebot.SendingMessage{
+		linebot.NewTextMessage(text),
+	}
+	if _, err := c.bot.ReplyMessage(replyToken, messages...).Do(); err != nil {
+		return err
+	}
+	return nil
+}

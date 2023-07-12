@@ -15,6 +15,35 @@ import (
 func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	token, err := line.PostChannelAccessToken()
+	if err != nil {
+		slog.ErrorCtx(ctx, "post channel access token error", "err", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	bot, err := line.NewLineBot(token)
+	if err != nil {
+		slog.ErrorCtx(ctx, "new line bot error", "err", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// MessageID から Messsage の詳細を取得
+	// 画像の場合のみ対応
+	// 画像を byte に変換
+	// lib.DecodeQrCode を呼び出す。
+	// URL を取得
+	// ユーザーへの応答をする
+
+	b, err := io.ReadAll(r.Body)
+	if err != nil {
+		slog.ErrorCtx(ctx, "request body read error", "err", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	slog.InfoCtx(ctx, "raw request body", "body", string(b))
+
 	v := webhookv1.LineWebhookRequest{}
 	decorder := json.NewDecoder(r.Body)
 	for {
@@ -27,31 +56,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	token, err := line.PostChannelAccessToken()
-	if err != nil {
-		slog.ErrorCtx(ctx, "post channel access token error", "err", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	slog.InfoCtx(ctx, "post channel access token", "token", token)
-
 	var result string
-
-	bot, err := line.NewLineBot(token)
-	if err != nil {
-		slog.ErrorCtx(ctx, "new line bot error", "err", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-
-	}
-
-	// MessageID から Messsage の詳細を取得
-	// 画像の場合のみ対応
-	// 画像を byte に変換
-	// lib.DecodeQrCode を呼び出す。
-	// URL を取得
-	// ユーザーへの応答をする
-
 	for _, event := range v.Events {
 		slog.InfoCtx(ctx, "event", "event", event)
 		m := event.Message

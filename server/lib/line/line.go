@@ -16,6 +16,32 @@ import (
 	"github.com/emahiro/qrurl/server/lib/jwt"
 )
 
+// Described at https://developers.line.biz/ja/reference/messaging-api/#webhook-event-objects
+type LineWebhookRequest struct {
+	Destination string              `json:"destination"`
+	Events      []*LineWebhookEvent `json:"events"`
+}
+
+type LineWebhookEvent struct {
+	Type    string              `json:"type"`
+	Message *LineWebhookMessage `json:"message"`
+}
+
+type LineWebhookMessage struct {
+	Type           string             `json:"type"`
+	Id             string             `json:"id"`
+	Text           string             `json:"text"`
+	ReplyToken     string             `json:"replyToken"`
+	WebhookEventId string             `json:"webhookEventId"`
+	Timestamp      int32              `json:"timestamp"`
+	Source         *LineWebhookSource `json:"source"`
+}
+
+type LineWebhookSource struct {
+	Type   string `json:"type"`
+	UserId string `json:"userId"`
+}
+
 // Described at https://developers.line.biz/ja/reference/messaging-api/#issue-channel-access-token-v2-1
 type PostChannelAccessTokenRequest struct {
 	GrantType           string `json:"grant_type"`

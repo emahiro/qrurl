@@ -7,7 +7,6 @@ import (
 
 	"golang.org/x/exp/slog"
 
-	webhookv1 "github.com/emahiro/qrurl/server/gen/proto/webhook/v1"
 	"github.com/emahiro/qrurl/server/lib"
 	"github.com/emahiro/qrurl/server/lib/line"
 )
@@ -36,7 +35,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 	// URL を取得
 	// ユーザーへの応答をする
 
-	v := webhookv1.LineWebhookRequest{}
+	v := line.LineWebhookRequest{}
 	decorder := json.NewDecoder(r.Body)
 	for {
 		if err := decorder.Decode(&v); err == io.EOF {

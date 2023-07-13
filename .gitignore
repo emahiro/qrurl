@@ -21,6 +21,4 @@
 go.work
 
 # GCP
-service.yaml
-policy.yaml
 .env.yaml

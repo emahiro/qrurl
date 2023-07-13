@@ -6,6 +6,10 @@ LINE の Bot と Web Browser に対応しています。
 
 ![qrurl の動作イメージ@LINE](imgs/スクリーンショット%202023-07-13%201.36.46.png)
 
+友だち追加はこちら
+
+![qrurl を友だち追加する](imgs/add-friend.png)
+
 # Stacks
 
 ## Server

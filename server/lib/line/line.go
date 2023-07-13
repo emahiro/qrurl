@@ -101,11 +101,7 @@ type PostChannelAccessTokenResponse struct {
 var client *linebot.Client
 
 func NewBot(_ context.Context) error {
-	at, err := postChannelAccessToken()
-	if err != nil {
-		return err
-	}
-	bot, err := linebot.New(os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"), at)
+	bot, err := linebot.New(os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"), os.Getenv("LINE_CHANNEL_ACCESS_TOKEN"))
 	if err != nil {
 		return err
 	}

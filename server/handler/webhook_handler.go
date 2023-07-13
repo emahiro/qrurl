@@ -35,26 +35,33 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		replyToken := event.ReplyToken
 
 		switch linebot.MessageType(message.Type) {
-		case linebot.MessageTypeText:
-			result = message.Text
 		case linebot.MessageTypeImage:
 			b, err := line.GetMessageContent(ctx, message.Id)
 			if err != nil {
 				slog.ErrorCtx(ctx, "get message content error", "err", err)
-				w.WriteHeader(http.StatusInternalServerError)
+				if err := line.ReplyMessage(ctx, replyToken, lib.ErrUnknown); err != nil {
+					slog.ErrorCtx(ctx, "reply message error", "err", err)
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				w.WriteHeader(http.StatusOK)
 				return
 			}
 			slog.InfoCtx(ctx, "get message content", "b", b)
 			content, err := lib.DecodeQrCode(ctx, b)
 			if err != nil {
 				slog.ErrorCtx(ctx, "decode qr code error", "err", err)
-				w.WriteHeader(http.StatusInternalServerError)
+				if err := line.ReplyMessage(ctx, replyToken, lib.ErrReadQrCode); err != nil {
+					slog.ErrorCtx(ctx, "reply message error", "err", err)
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				w.WriteHeader(http.StatusOK)
 				return
 			}
 			result = content
 		default:
-			slog.ErrorCtx(ctx, "not supported type", "type", message.Type)
-			result = "not supported"
+			result = lib.ErrNotSupportedMediaType
 		}
 
 		// reply message

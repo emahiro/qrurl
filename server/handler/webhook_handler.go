@@ -35,8 +35,6 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		replyToken := event.ReplyToken
 
 		switch linebot.MessageType(message.Type) {
-		case linebot.MessageTypeText:
-			result = message.Text
 		case linebot.MessageTypeImage:
 			b, err := line.GetMessageContent(ctx, message.Id)
 			if err != nil {
@@ -53,8 +51,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			result = content
 		default:
-			slog.ErrorCtx(ctx, "not supported type", "type", message.Type)
-			result = "not supported"
+			result = lib.ErrNotSupportedMediaType
 		}
 
 		// reply message

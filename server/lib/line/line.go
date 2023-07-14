@@ -33,7 +33,7 @@ func NewBot(ctx context.Context, useLongTermToken bool) error {
 			return err
 		}
 		if !valid {
-			t, err := postChannelAccessToken(ctx)
+			t, err := PostChannelAccessToken(ctx)
 			if err != nil {
 				return err
 			}
@@ -41,11 +41,20 @@ func NewBot(ctx context.Context, useLongTermToken bool) error {
 		}
 	}
 
+	if err := NewBotClient(at); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func NewBotClient(at string) error {
 	bot, err := linebot.New(os.Getenv("LINE_CHANNEL_SECRET"), at)
 	if err != nil {
 		return err
 	}
 
+	// set bot to singleton
 	client = bot
 	return nil
 }
@@ -79,7 +88,7 @@ func CheckIfTokenValid(ctx context.Context, token string) (bool, error) {
 // ChannelAccessToken の上限に達すると新規の発行はできなくなるので、永続化して都度再利用、有効期限が
 // 切れたら refresh する。
 // ref: https://developers.line.biz/ja/docs/messaging-api/channel-access-tokens/
-func postChannelAccessToken(ctx context.Context) (string, error) {
+func PostChannelAccessToken(ctx context.Context) (string, error) {
 	token, err := jwt.CreateToken(ctx)
 	if err != nil {
 		return "", err

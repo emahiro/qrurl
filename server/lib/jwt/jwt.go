@@ -13,10 +13,9 @@ import (
 )
 
 func CreateToken() (string, error) {
-
 	kID := os.Getenv("LINE_PUBLIC_KEY_ID")
 	channelID := os.Getenv("LINE_CHANNEL_ID")
-	pribateKey := os.Getenv("LINE_PRIVATE_KEY")
+	privKey := os.Getenv("LINE_PRIVATE_KEY")
 
 	hdrs := jws.NewHeaders()
 	_ = hdrs.Set(jws.AlgorithmKey, "RS256")
@@ -37,8 +36,7 @@ func CreateToken() (string, error) {
 		return "", err
 	}
 
-	fmt.Printf("private key: %s\n", pribateKey)
-	key, err := jwk.ParseKey([]byte(pribateKey))
+	key, err := jwk.ParseKey([]byte(privKey))
 	if err != nil {
 		fmt.Printf("failed to parse private key: %s\n", err)
 		return "", err

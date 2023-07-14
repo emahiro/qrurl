@@ -20,7 +20,7 @@ import (
 var client *linebot.Client
 
 func NewBot(ctx context.Context, useLongTermToken bool) error {
-	// checking if latest accesstoken is valid
+	// [TODO]: checking if latest accesstoken is valid
 	// 1. fetch token from datastore.
 	// 2. check if token is valid.
 	// 3. if valid, use it.

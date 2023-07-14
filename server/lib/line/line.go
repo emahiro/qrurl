@@ -20,16 +20,15 @@ import (
 var client *linebot.Client
 
 func NewBot(ctx context.Context, useLongTermToken bool) error {
-	// [TODO]: checking if latest accesstoken is valid
-	// 1. fetch token from datastore.
-	// 2. check if token is valid.
-	// 3. if valid, use it.
-	// 4. if not valid, fetch new token from LINE API or using long term token.
-
 	at := os.Getenv("LINE_CHANNEL_ACCESS_TOKEN")
 	if !useLongTermToken {
-		// check validation
-		valid, token, err := CheckIfTokenValid(ctx)
+		// [TODO]: checking if latest accesstoken is valid
+		// 1. fetch token from datastore.
+		// 2. check if token is valid.
+		// 3. if valid, use it.
+		// 4. if not valid, fetch new token from LINE API or using long term token.
+		var tokenFromDatastore string
+		valid, err := CheckIfTokenValid(ctx, tokenFromDatastore)
 		if err != nil {
 			return err
 		}
@@ -39,12 +38,10 @@ func NewBot(ctx context.Context, useLongTermToken bool) error {
 				return err
 			}
 			at = t
-		} else {
-			at = token
 		}
 	}
 
-	bot, err := linebot.New(os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"), at)
+	bot, err := linebot.New(os.Getenv("LINE_CHANNEL_SECRET"), at)
 	if err != nil {
 		return err
 	}
@@ -53,41 +50,28 @@ func NewBot(ctx context.Context, useLongTermToken bool) error {
 	return nil
 }
 
-type TokenVerifyResult struct {
-	ClientID  string `json:"client_id"`
-	ExpiresIn int64  `json:"expires_in"`
-	Scope     string `json:"scope"`
-}
-
-func CheckIfTokenValid(_ context.Context) (bool, string, error) {
-	// TODO: fetch latest access-token from datastore
-	var at string
+func CheckIfTokenValid(ctx context.Context, token string) (bool, error) {
 	v := url.Values{}
-	v.Add("access_token", at)
+	v.Add("access_token", token)
 	b := strings.NewReader(v.Encode())
 
 	req, err := http.NewRequest(http.MethodPost, "https://api.line.me/oauth2/v2.1/verify", b)
 	if err != nil {
-		return false, "", err
+		return false, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return false, "", err
+		return false, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return false, "", nil
+		slog.InfoCtx(ctx, "invalid access-token and regenerate line bot client")
+		return false, nil
 	}
-
-	var result TokenVerifyResult
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return false, "", err
-	}
-
-	return true, at, nil
+	return true, nil
 }
 
 // PostChannelAccessToken はチャンネルアクセストークンを取得する。

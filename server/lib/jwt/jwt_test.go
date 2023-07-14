@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"context"
 	"os"
 	"testing"
 )
@@ -45,7 +46,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateToken(t *testing.T) {
-	token, err := CreateToken()
+	token, err := CreateToken(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -49,7 +49,7 @@ func NewBot(ctx context.Context, useLongTermToken bool) error {
 }
 
 func NewBotClient(at string) error {
-	bot, err := linebot.New(os.Getenv("LINE_CHANNEL_SECRET"), at)
+	bot, err := linebot.New(os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"), at)
 	if err != nil {
 		return err
 	}

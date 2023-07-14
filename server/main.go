@@ -25,7 +25,7 @@ func main() {
 	defer cancel()
 
 	// init line
-	if err := line.NewBot(ctx); err != nil {
+	if err := line.NewBot(ctx, true); err != nil {
 		slog.ErrorCtx(ctx, "failed to init line bot", "err", err)
 		panic(err)
 	}
@@ -33,7 +33,10 @@ func main() {
 	router := chi.NewRouter()
 	// 標準の http handler
 	router.Group(func(r chi.Router) {
-		r.Use(intercepter.VerifyLine())
+		r.Use(
+			intercepter.VerifyLine(),
+			intercepter.VerifyChannelAccessToken(),
+		)
 		r.HandleFunc("/v1/webhook/line", handler.LineWebHookHandler)
 	})
 

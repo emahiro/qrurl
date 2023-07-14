@@ -16,9 +16,80 @@ import (
 	"github.com/emahiro/qrurl/server/lib/jwt"
 )
 
+// singleton
+var client *linebot.Client
+
+func NewBot(ctx context.Context, useLongTermToken bool) error {
+	at := os.Getenv("LINE_CHANNEL_ACCESS_TOKEN")
+	if !useLongTermToken {
+		// [TODO]: checking if latest accesstoken is valid
+		// 1. fetch token from datastore.
+		// 2. check if token is valid.
+		// 3. if valid, use it.
+		// 4. if not valid, fetch new token from LINE API or using long term token.
+		var tokenFromDatastore string
+		valid, err := CheckIfTokenValid(ctx, tokenFromDatastore)
+		if err != nil {
+			return err
+		}
+		if !valid {
+			t, err := PostChannelAccessToken(ctx)
+			if err != nil {
+				return err
+			}
+			at = t
+		}
+	}
+
+	if err := NewBotClient(at); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func NewBotClient(at string) error {
+	bot, err := linebot.New(os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"), at)
+	if err != nil {
+		return err
+	}
+
+	// set bot to singleton
+	client = bot
+	return nil
+}
+
+func CheckIfTokenValid(ctx context.Context, token string) (bool, error) {
+	v := url.Values{}
+	v.Add("access_token", token)
+	b := strings.NewReader(v.Encode())
+
+	req, err := http.NewRequest(http.MethodPost, "https://api.line.me/oauth2/v2.1/verify", b)
+	if err != nil {
+		return false, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		slog.InfoCtx(ctx, "invalid access-token and regenerate line bot client")
+		return false, nil
+	}
+	return true, nil
+}
+
 // PostChannelAccessToken はチャンネルアクセストークンを取得する。
-func postChannelAccessToken() (string, error) {
-	token, err := jwt.CreateToken()
+// ChannelAccessToken の登録上限は30件。乱発は禁止。
+// ChannelAccessToken の上限に達すると新規の発行はできなくなるので、永続化して都度再利用、有効期限が
+// 切れたら refresh する。
+// ref: https://developers.line.biz/ja/docs/messaging-api/channel-access-tokens/
+func PostChannelAccessToken(ctx context.Context) (string, error) {
+	token, err := jwt.CreateToken(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -54,6 +125,10 @@ func postChannelAccessToken() (string, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
 		return "", err
 	}
+
+	// persist token process
+	// Datastore に取得したアクセストークン、KeyID、有効期限、ClientAssertion を保存する。
+
 	return v.AccessToken, nil
 }
 
@@ -95,19 +170,6 @@ type PostChannelAccessTokenResponse struct {
 	TokenType   string `json:"token_type"`
 	ExpiresIn   int64  `json:"expires_in"`
 	KeyID       string `json:"key_id"`
-}
-
-// singleton
-var client *linebot.Client
-
-func NewBot(_ context.Context) error {
-	bot, err := linebot.New(os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"), os.Getenv("LINE_CHANNEL_ACCESS_TOKEN"))
-	if err != nil {
-		return err
-	}
-
-	client = bot
-	return nil
 }
 
 func GetMessageContent(_ context.Context, messageID string) ([]byte, error) {

@@ -5,9 +5,8 @@ import (
 	"io"
 	"net/http"
 
-	"golang.org/x/exp/slog"
-
 	"github.com/line/line-bot-sdk-go/v7/linebot"
+	"golang.org/x/exp/slog"
 
 	"github.com/emahiro/qrurl/server/lib"
 	"github.com/emahiro/qrurl/server/lib/line"

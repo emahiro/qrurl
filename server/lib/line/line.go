@@ -17,6 +17,10 @@ import (
 )
 
 // PostChannelAccessToken はチャンネルアクセストークンを取得する。
+// ChannelAccessToken の登録上限は30件。乱発は禁止。
+// ChannelAccessToken の上限に達すると新規の発行はできなくなるので、永続化して都度再利用、有効期限が
+// 切れたら refresh する。
+// ref: https://developers.line.biz/ja/docs/messaging-api/channel-access-tokens/
 func postChannelAccessToken(ctx context.Context) (string, error) {
 	token, err := jwt.CreateToken(ctx)
 	if err != nil {

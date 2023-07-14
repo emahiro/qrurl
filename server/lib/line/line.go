@@ -58,6 +58,10 @@ func postChannelAccessToken(ctx context.Context) (string, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
 		return "", err
 	}
+
+	// persist token process
+	// Datastore に取得したアクセストークン、KeyID、有効期限、ClientAssertion を保存する。
+
 	return v.AccessToken, nil
 }
 
@@ -105,8 +109,15 @@ type PostChannelAccessTokenResponse struct {
 var client *linebot.Client
 
 func NewBot(ctx context.Context, useLongTermToken bool) error {
+	// checking if latest accesstoken is valid
+	// 1. fetch token from datastore.
+	// 2. check if token is valid.
+	// 3. if valid, use it.
+	// 4. if not valid, fetch new token from LINE API or using long term token.
+
 	at := os.Getenv("LINE_CHANNEL_ACCESS_TOKEN")
 	if !useLongTermToken || at != "" {
+		// check validation
 		t, err := postChannelAccessToken(ctx)
 		if err != nil {
 			return err

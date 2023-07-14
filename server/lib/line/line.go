@@ -104,8 +104,17 @@ type PostChannelAccessTokenResponse struct {
 // singleton
 var client *linebot.Client
 
-func NewBot(_ context.Context) error {
-	bot, err := linebot.New(os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"), os.Getenv("LINE_CHANNEL_ACCESS_TOKEN"))
+func NewBot(ctx context.Context, useLongTermToken bool) error {
+	at := os.Getenv("LINE_CHANNEL_ACCESS_TOKEN")
+	if !useLongTermToken || at != "" {
+		t, err := postChannelAccessToken(ctx)
+		if err != nil {
+			return err
+		}
+		at = t
+	}
+
+	bot, err := linebot.New(os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"), at)
 	if err != nil {
 		return err
 	}

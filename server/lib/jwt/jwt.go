@@ -12,13 +12,12 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
-var (
-	kID        = os.Getenv("LINE_PUBLIC_KEY_ID")
-	channelID  = os.Getenv("LINE_CHANNEL_ID")
-	pribateKey = os.Getenv("LINE_PRIVATE_KEY")
-)
-
 func CreateToken() (string, error) {
+
+	kID := os.Getenv("LINE_PUBLIC_KEY_ID")
+	channelID := os.Getenv("LINE_CHANNEL_ID")
+	pribateKey := os.Getenv("LINE_PRIVATE_KEY")
+
 	hdrs := jws.NewHeaders()
 	_ = hdrs.Set(jws.AlgorithmKey, "RS256")
 	_ = hdrs.Set(jws.TypeKey, "JWT")
@@ -38,6 +37,7 @@ func CreateToken() (string, error) {
 		return "", err
 	}
 
+	fmt.Printf("private key: %s\n", pribateKey)
 	key, err := jwk.ParseKey([]byte(pribateKey))
 	if err != nil {
 		fmt.Printf("failed to parse private key: %s\n", err)

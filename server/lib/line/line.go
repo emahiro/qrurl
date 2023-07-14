@@ -17,8 +17,8 @@ import (
 )
 
 // PostChannelAccessToken はチャンネルアクセストークンを取得する。
-func postChannelAccessToken() (string, error) {
-	token, err := jwt.CreateToken()
+func postChannelAccessToken(ctx context.Context) (string, error) {
+	token, err := jwt.CreateToken(ctx)
 	if err != nil {
 		return "", err
 	}

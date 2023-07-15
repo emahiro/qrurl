@@ -12,6 +12,7 @@ import (
 	"github.com/emahiro/qrurl/server/gen/proto/ping/v1/pingv1connect"
 	"github.com/emahiro/qrurl/server/gen/proto/qrurl/v1/qrurlv1connect"
 	"github.com/emahiro/qrurl/server/handler"
+	"github.com/emahiro/qrurl/server/infra/firestore"
 	"github.com/emahiro/qrurl/server/intercepter"
 	"github.com/emahiro/qrurl/server/lib/line"
 	"github.com/emahiro/qrurl/server/service"
@@ -27,6 +28,11 @@ func main() {
 	// init line
 	if err := line.NewBot(ctx, true); err != nil {
 		slog.ErrorCtx(ctx, "failed to init line bot", "err", err)
+		panic(err)
+	}
+	// init firestore
+	if err := firestore.New(ctx); err != nil {
+		slog.ErrorCtx(ctx, "failed to init firestore", "err", err)
 		panic(err)
 	}
 

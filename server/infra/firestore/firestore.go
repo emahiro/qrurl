@@ -30,7 +30,7 @@ func Close() error {
 	return client.Close()
 }
 
-func Add(ctx context.Context, collection string, data any) error {
+func Add[T any](ctx context.Context, collection string, data T) error {
 	_, _, err := client.Collection(collection).Add(ctx, data)
 	return err
 }

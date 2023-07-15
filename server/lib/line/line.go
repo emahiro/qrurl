@@ -9,11 +9,13 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"golang.org/x/exp/slog"
 
 	"github.com/emahiro/qrurl/server/lib/jwt"
+	"github.com/emahiro/qrurl/server/repository"
 )
 
 // singleton
@@ -128,6 +130,18 @@ func PostChannelAccessToken(ctx context.Context) (string, error) {
 
 	// persist token process
 	// Datastore に取得したアクセストークン、KeyID、有効期限、ClientAssertion を保存する。
+	now := time.Now().Unix()
+	lineChannelAccessTokenRepo := repository.LineChannelAccessTokenRepository{}
+	if err := lineChannelAccessTokenRepo.Create(ctx, repository.LineChannelAccessTokenRepository{
+		AccessToken:     v.AccessToken,
+		ExpiresIn:       v.ExpiresIn,
+		KeyID:           v.KeyID,
+		ClientAssertion: token,
+		CreatedAt:       now,
+		UpdatedAt:       now,
+	}); err != nil {
+		return "", err
+	}
 
 	return v.AccessToken, nil
 }

@@ -55,6 +55,27 @@ func GetAll[T any](ctx context.Context, collection string) ([]T, error) {
 	return results, nil
 }
 
+func GetLatestOne[T any](ctx context.Context, collection string) (*T, error) {
+	query := client.Collection(collection).OrderBy("CreatedAt", firestore.Desc).Limit(1)
+	iter := query.Documents(ctx)
+	results := make([]T, 1)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		var result T
+		if err := doc.DataTo(&result); err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+	return &results[0], nil
+}
+
 func Query[T any](ctx context.Context, collenction, key, op, value string) ([]T, error) {
 	query := client.Collection(collenction).Where(key, op, value)
 	iter := query.Documents(ctx)

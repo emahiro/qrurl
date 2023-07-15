@@ -24,13 +24,12 @@ var client *linebot.Client
 func NewBot(ctx context.Context, useLongTermToken bool) error {
 	at := os.Getenv("LINE_CHANNEL_ACCESS_TOKEN")
 	if !useLongTermToken {
-		// [TODO]: checking if latest accesstoken is valid
-		// 1. fetch token from datastore.
-		// 2. check if token is valid.
-		// 3. if valid, use it.
-		// 4. if not valid, fetch new token from LINE API or using long term token.
-		var tokenFromDatastore string
-		valid, err := CheckIfTokenValid(ctx, tokenFromDatastore)
+		repo := repository.LineChannelAccessTokenRepository{}
+		at, err := repo.GetLatestAccessToken(ctx)
+		if err != nil {
+			return err
+		}
+		valid, err := CheckIfTokenValid(ctx, at)
 		if err != nil {
 			return err
 		}

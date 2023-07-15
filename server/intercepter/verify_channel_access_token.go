@@ -6,6 +6,7 @@ import (
 	"golang.org/x/exp/slog"
 
 	"github.com/emahiro/qrurl/server/lib/line"
+	"github.com/emahiro/qrurl/server/repository"
 )
 
 // VerifyChannelAccessToken checks if channel access token is valid and if invalid fetch new token and new client.
@@ -13,8 +14,13 @@ func VerifyChannelAccessToken() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, origReq *http.Request) {
 			ctx := origReq.Context()
-			// TODO: fetch channel access token from datastore
-			var at string
+			repo := repository.LineChannelAccessTokenRepository{}
+			at, err := repo.GetLatestAccessToken(ctx)
+			if err != nil {
+				slog.ErrorCtx(ctx, "failed to fetch latest access token: %v", "err=", err)
+				http.Error(w, "failed to fetch latest access token", http.StatusInternalServerError)
+				return
+			}
 			if at != "" {
 				valid, err := line.CheckIfTokenValid(ctx, at)
 				if err != nil {

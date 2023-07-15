@@ -21,3 +21,14 @@ const LineChannelAccessTokenCollection = "LineChannelAccessToken"
 func (r LineChannelAccessTokenRepository) Create(ctx context.Context, src LineChannelAccessTokenRepository) error {
 	return firestore.Add(ctx, LineChannelAccessTokenCollection, src)
 }
+
+func (r LineChannelAccessTokenRepository) GetLatestAccessToken(ctx context.Context) (string, error) {
+	dst, err := firestore.GetLatestOne[LineChannelAccessTokenRepository](ctx, LineChannelAccessTokenCollection)
+	if err != nil {
+		return "", err
+	}
+	if dst == nil {
+		return "", nil
+	}
+	return dst.AccessToken, nil
+}

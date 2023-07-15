@@ -35,8 +35,8 @@ func Add(ctx context.Context, collection string, data any) error {
 	return err
 }
 
-func GetAll(ctx context.Context, collection string) ([]map[string]any, error) {
-	result := make([]map[string]any, 0)
+func GetAll[T any](ctx context.Context, collection string) ([]T, error) {
+	results := make([]T, 0)
 	iter := client.Collection(collection).Documents(ctx)
 	for {
 		doc, err := iter.Next()
@@ -46,15 +46,19 @@ func GetAll(ctx context.Context, collection string) ([]map[string]any, error) {
 		if err != nil {
 			return nil, err
 		}
-		result = append(result, doc.Data())
+		var result T
+		if err := doc.DataTo(&result); err != nil {
+			return nil, err
+		}
+		results = append(results, result)
 	}
-	return result, nil
+	return results, nil
 }
 
-func Query(ctx context.Context, collenction, key, op, value string) ([]map[string]any, error) {
+func Query[T any](ctx context.Context, collenction, key, op, value string) ([]T, error) {
 	query := client.Collection(collenction).Where(key, op, value)
 	iter := query.Documents(ctx)
-	results := make([]map[string]any, 0)
+	results := make([]T, 0)
 	for {
 		ss, err := iter.Next()
 		if err == iterator.Done {
@@ -63,7 +67,12 @@ func Query(ctx context.Context, collenction, key, op, value string) ([]map[strin
 		if err != nil {
 			return nil, err
 		}
-		results = append(results, ss.Data())
+
+		var result T
+		if err := ss.DataTo(&result); err != nil {
+			return nil, err
+		}
+		results = append(results, result)
 	}
 	return results, nil
 }

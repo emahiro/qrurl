@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/bufbuild/connect-go"
-	"github.com/go-chi/chi/v5"
 	"golang.org/x/exp/slog"
 
 	"github.com/emahiro/qrurl/server/gen/proto/ping/v1/pingv1connect"
@@ -36,28 +35,22 @@ func main() {
 		panic(err)
 	}
 
-	router := chi.NewRouter()
-	// 標準の http handler
-	router.Group(func(r chi.Router) {
-		r.Use(
-			intercepter.VerifyLine(),
-			intercepter.VerifyChannelAccessToken(),
-		)
-		r.HandleFunc("/v1/webhook/line", handler.LineWebHookHandler)
-	})
+	mux := http.NewServeMux()
+	// r.Use(
+	// 	intercepter.VerifyLine(),
+	// 	intercepter.VerifyChannelAccessToken(),
+	// )
+	mux.HandleFunc("/v1/webhook/line", handler.LineWebHookHandler)
 
-	// for GRPC
-	router.Group(func(r chi.Router) {
-		intercepters := connect.WithInterceptors(
-			intercepter.NewRequestLogIntercepter(),
-		)
-		r.Handle(qrurlv1connect.NewQrUrlServiceHandler(&service.QrUrlService{}, intercepters))
-		r.Handle(pingv1connect.NewPingServiceHandler(&service.PingService{}, intercepters))
-	})
+	intercepters := connect.WithInterceptors(
+		intercepter.NewRequestLogIntercepter(),
+	)
+	mux.Handle(qrurlv1connect.NewQrUrlServiceHandler(&service.QrUrlService{}, intercepters))
+	mux.Handle(pingv1connect.NewPingServiceHandler(&service.PingService{}, intercepters))
 
 	server := &http.Server{
 		Addr:    addr,
-		Handler: router,
+		Handler: mux,
 	}
 	go func() {
 		<-ctx.Done()

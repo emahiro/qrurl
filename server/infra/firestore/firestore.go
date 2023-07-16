@@ -39,26 +39,6 @@ func Add[T any](ctx context.Context, collection string, data T) error {
 	return err
 }
 
-func GetAll[T any](ctx context.Context, collection string) ([]T, error) {
-	results := make([]T, 0)
-	iter := client.Collection(collection).Documents(ctx)
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-		var result T
-		if err := doc.DataTo(&result); err != nil {
-			return nil, err
-		}
-		results = append(results, result)
-	}
-	return results, nil
-}
-
 type QueryOption struct {
 	Key     string
 	Op      string

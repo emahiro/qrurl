@@ -1,4 +1,4 @@
-package intercepter
+package middleware
 
 import (
 	"net/http"

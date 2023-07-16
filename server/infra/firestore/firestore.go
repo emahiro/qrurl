@@ -48,13 +48,13 @@ type QueryOption struct {
 	Limit   int
 }
 
-func Query[T any](ctx context.Context, collenction string, opt QueryOption) ([]T, error) {
+func Query[T any](ctx context.Context, collection string, opt QueryOption) ([]T, error) {
 	limit := opt.Limit
 	if limit == 0 {
 		limit = 1000
 	}
 
-	query := client.Collection(collenction).Limit(limit)
+	query := client.Collection(collection).Limit(limit)
 
 	if opt.Key != "" && opt.Op != "" && opt.Value != "" {
 		query = query.Where(opt.Key, opt.Op, opt.Value)

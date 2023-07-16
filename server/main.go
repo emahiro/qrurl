@@ -16,6 +16,7 @@ import (
 	"github.com/emahiro/qrurl/server/infra/firestore"
 	"github.com/emahiro/qrurl/server/intercepter"
 	"github.com/emahiro/qrurl/server/lib/line"
+	"github.com/emahiro/qrurl/server/middleware"
 	"github.com/emahiro/qrurl/server/service"
 )
 
@@ -38,10 +39,10 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	// r.Use(
-	// 	intercepter.VerifyLine(),
-	// 	intercepter.VerifyChannelAccessToken(),
-	// )
+	middleware.Chain(mux,
+		middleware.VerifyChannelAccessToken,
+		middleware.VerifyLine,
+	)
 	mux.HandleFunc("/v1/webhook/line", handler.LineWebHookHandler)
 
 	intercepters := connect.WithInterceptors(

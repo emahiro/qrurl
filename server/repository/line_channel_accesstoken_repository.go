@@ -23,12 +23,17 @@ func (r LineChannelAccessTokenRepository) Create(ctx context.Context, src LineCh
 }
 
 func (r LineChannelAccessTokenRepository) GetLatestAccessToken(ctx context.Context) (string, error) {
-	dst, err := firestore.GetLatestOne[LineChannelAccessTokenRepository](ctx, LineChannelAccessTokenCollection)
+
+	dst, err := firestore.Query[LineChannelAccessTokenRepository](ctx, LineChannelAccessTokenCollection, firestore.QueryOption{
+		OrderBy: "created_at",
+		Desc:    true,
+		Limit:   1,
+	})
 	if err != nil {
 		return "", err
 	}
-	if dst == nil {
+	if len(dst) == 0 {
 		return "", nil
 	}
-	return dst.AccessToken, nil
+	return dst[0].AccessToken, nil
 }

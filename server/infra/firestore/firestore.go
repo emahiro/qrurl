@@ -26,6 +26,10 @@ func New(ctx context.Context) error {
 	return nil
 }
 
+func Client() *firestore.Client {
+	return client
+}
+
 func Close() error {
 	return client.Close()
 }
@@ -55,29 +59,35 @@ func GetAll[T any](ctx context.Context, collection string) ([]T, error) {
 	return results, nil
 }
 
-func GetLatestOne[T any](ctx context.Context, collection string) (*T, error) {
-	query := client.Collection(collection).OrderBy("CreatedAt", firestore.Desc).Limit(1)
-	iter := query.Documents(ctx)
-	results := make([]T, 1)
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-		var result T
-		if err := doc.DataTo(&result); err != nil {
-			return nil, err
-		}
-		results = append(results, result)
-	}
-	return &results[0], nil
+type QueryOption struct {
+	Key     string
+	Op      string
+	Value   any
+	OrderBy string
+	Desc    bool
+	Limit   int
 }
 
-func Query[T any](ctx context.Context, collenction, key, op, value string) ([]T, error) {
-	query := client.Collection(collenction).Where(key, op, value)
+func Query[T any](ctx context.Context, collenction string, opt QueryOption) ([]T, error) {
+	limit := opt.Limit
+	if limit == 0 {
+		limit = 1000
+	}
+
+	query := client.Collection(collenction).Limit(limit)
+
+	if opt.Key != "" && opt.Op != "" && opt.Value != "" {
+		query = query.Where(opt.Key, opt.Op, opt.Value)
+	}
+
+	if opt.OrderBy != "" {
+		if opt.Desc {
+			query = query.OrderBy(opt.OrderBy, firestore.Desc)
+		} else {
+			query = query.OrderBy(opt.OrderBy, firestore.Asc)
+		}
+	}
+
 	iter := query.Documents(ctx)
 	results := make([]T, 0)
 	for {

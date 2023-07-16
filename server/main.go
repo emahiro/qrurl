@@ -7,6 +7,8 @@ import (
 
 	"github.com/bufbuild/connect-go"
 	"golang.org/x/exp/slog"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 
 	"github.com/emahiro/qrurl/server/gen/proto/ping/v1/pingv1connect"
 	"github.com/emahiro/qrurl/server/gen/proto/qrurl/v1/qrurlv1connect"
@@ -50,7 +52,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    addr,
-		Handler: mux,
+		Handler: h2c.NewHandler(mux, &http2.Server{}),
 	}
 	go func() {
 		<-ctx.Done()

@@ -12,7 +12,7 @@ import (
 
 var lineMessageChannelSecret = os.Getenv("LINE_MESSAGE_CHANNEL_SECRET")
 
-func VerifyLine(http.Handler) http.HandlerFunc {
+func VerifyLine(http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, origReq *http.Request) {
 		ctx := origReq.Context()
 

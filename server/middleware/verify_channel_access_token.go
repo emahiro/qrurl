@@ -10,7 +10,7 @@ import (
 )
 
 // VerifyChannelAccessToken checks if channel access token is valid and if invalid fetch new token and new client.
-func VerifyChannelAccessToken(http.Handler) http.HandlerFunc {
+func VerifyChannelAccessToken(http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, origReq *http.Request) {
 		ctx := origReq.Context()
 		repo := repository.LineChannelAccessTokenRepository{}

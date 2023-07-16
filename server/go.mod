@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go/firestore v1.11.0
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/bufbuild/connect-go v1.9.0
-	github.com/go-chi/chi/v5 v5.0.8
 	github.com/lestrrat-go/jwx/v2 v2.0.11
 	github.com/line/line-bot-sdk-go/v7 v7.20.0
 	github.com/makiuchi-d/gozxing v0.1.2-0.20230218072048-d8563176fedd

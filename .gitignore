@@ -24,4 +24,5 @@ go.work
 .env.yaml
 
 # workspace
+.envrc
 .env

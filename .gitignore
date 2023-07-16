@@ -22,3 +22,7 @@ go.work
 
 # GCP
 .env.yaml
+
+# workspace
+.envrc
+.env

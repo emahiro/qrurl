@@ -38,6 +38,9 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
 
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker
+
       - name: Deploy to Cloud Run
         run: |-
           echo "GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}" > .env.yaml

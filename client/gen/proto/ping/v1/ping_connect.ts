@@ -21,6 +21,5 @@ export const PingService = {
       O: PingResponse,
       kind: MethodKind.Unary,
     },
-  }
+  },
 } as const;
-

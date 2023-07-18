@@ -2,6 +2,19 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
+import { createConnectTransport } from "@bufbuild/connect-web";
+import { createPromiseClient } from "@bufbuild/connect";
+import { PingService } from "../gen/proto/ping/v1/ping_connectweb";
+// init gRPC Client
+const transport = createConnectTransport({
+  baseUrl: "http://localhost:8080",
+});
+
+const client = createPromiseClient(PingService, transport);
+
+async function ping(text: string) {
+  return client.ping({ text });
+}
 
 function App() {
   const [count, setCount] = useState(0);

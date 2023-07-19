@@ -9,7 +9,9 @@ require (
 	github.com/lestrrat-go/jwx/v2 v2.0.11
 	github.com/line/line-bot-sdk-go/v7 v7.20.0
 	github.com/makiuchi-d/gozxing v0.1.2-0.20230218072048-d8563176fedd
+	github.com/rs/cors v1.9.0
 	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
+	golang.org/x/net v0.12.0
 	google.golang.org/api v0.131.0
 	google.golang.org/protobuf v1.31.0
 )
@@ -35,11 +37,9 @@ require (
 	github.com/lestrrat-go/httprc v1.0.4 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
-	github.com/rs/cors v1.9.0 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.11.0 // indirect
-	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.10.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect

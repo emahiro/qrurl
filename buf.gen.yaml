@@ -10,3 +10,11 @@ plugins:
   - plugin: connect-go
     out: server/gen
     opt: paths=source_relative
+  - plugin: es
+    path: ./client/node_modules/.bin/protoc-gen-es
+    out: client/gen
+    opt: target=ts
+  - plugin: connect-web
+    path: ./client/node_modules/.bin/protoc-gen-connect-web
+    out: client/gen
+    opt: target=ts

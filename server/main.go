@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/bufbuild/connect-go"
+	"github.com/rs/cors"
 	"golang.org/x/exp/slog"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -38,6 +39,12 @@ func main() {
 		panic(err)
 	}
 
+	// cors setting
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"*"},
+		AllowedHeaders: []string{"*"},
+	})
+
 	mux := http.NewServeMux()
 	middleware.Chain(mux,
 		middleware.VerifyChannelAccessToken,
@@ -53,7 +60,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    addr,
-		Handler: h2c.NewHandler(mux, &http2.Server{}),
+		Handler: c.Handler(h2c.NewHandler(mux, &http2.Server{})),
 	}
 	go func() {
 		<-ctx.Done()

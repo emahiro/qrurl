@@ -16,6 +16,9 @@ jobs:
       matrix:
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./server
 
     permissions:
       contents: "read"

@@ -45,7 +45,7 @@ jobs:
       - name: Build Images
         run: docker build -t asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/qrurl-client-image:latest --platform linux/amd64 .
 
-      - name: Build Images
+      - name: Push Images
         run: docker push asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/qrurl-client-image:latest
 
       - name: Deploy to Cloud Run

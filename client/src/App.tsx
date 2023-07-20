@@ -1,23 +1,14 @@
 import "./App.css";
-import { createConnectTransport } from "@bufbuild/connect-web";
-import { createPromiseClient } from "@bufbuild/connect";
-import { PingService } from "../gen/proto/ping/v1/ping_connectweb";
+import { Ping } from "./libs/apis/ping";
 
 function App() {
-  // init gRPC Client
-  const transport = createConnectTransport({
-    baseUrl: "http://localhost:8080",
-  });
-
-  const client = createPromiseClient(PingService, transport);
-
-  void client.ping({ message: "Hello" }, {}).then((resp) => {
-    console.log(resp);
+  void Ping().then((res) => {
+    console.log(res);
   });
 
   return (
     <>
-      <h1>QRURL</h1>
+      <h1>QRコードリーダー</h1>
       <p>test</p>
     </>
   );

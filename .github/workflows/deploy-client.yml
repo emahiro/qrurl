@@ -1,0 +1,65 @@
+name: "Deploy Client"
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  QRURL_APP_URL: ${{ secrets.QRURL_APP_URL }}
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_DEPLOY_SERVICE_ACCOUNT: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
+  SERVICE_NAME: qrurl-client
+  REGION: asia-northeast1
+
+jobs:
+  deploy:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./client
+
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker
+
+      - name: Build Images
+        run: docker build -t asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/qrurl-client-image:latest --platform linux/amd64 .
+
+      - name: Push Images
+        run: docker push asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/qrurl-client-image:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          echo TRANSPORT_URL=$QRURL_APP_URL > .env
+          gcloud run deploy $SERVICE_NAME \
+          --project=$GCP_PROJECT_ID \
+          --region=$REGION \
+          --service-account=$GCP_DEPLOY_SERVICE_ACCOUNT@$GCP_PROJECT_ID.iam.gserviceaccount.com \
+          --image asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/qrurl-client-image:latest \
+          --region=asia-northeast1 \
+          --allow-unauthenticated \
+          --cpu=2 \
+          --memory=512Mi \
+          --timeout=60 \
+          --platform managed

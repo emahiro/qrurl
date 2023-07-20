@@ -52,6 +52,5 @@ jobs:
             --memory=512Mi \
             --timeout=60 \
             --platform managed \
-            --region asia-northeast1 \
             --env-vars-file ./.env.yaml \
             --source ./server

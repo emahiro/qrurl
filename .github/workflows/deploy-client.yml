@@ -10,6 +10,10 @@ on:
 
 env:
   QRURL_APP_URL: ${{ secrets.QRURL_APP_URL }}
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_DEPLOY_SERVICE_ACCOUNT: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
+  SERVICE_NAME: qrurl-app
+  REGION: asia-northeast1
 
 jobs:
   deploy:
@@ -51,7 +55,10 @@ jobs:
       - name: Deploy to Cloud Run
         run: |
           echo TRANSPORT_URL=$QRURL_APP_URL > .env
-          gcloud run deploy \
+          gcloud run deploy $SERVICE_NAME \
+          --project=$GCP_PROJECT_ID \
+          --region=$REGION \
+          --service-account=$GCP_DEPLOY_SERVICE_ACCOUNT@$GCP_PROJECT_ID.iam.gserviceaccount.com \
           --image asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/qrurl-client-image:latest \
           --project=emahiro-dev \
           --region=asia-northeast1 \

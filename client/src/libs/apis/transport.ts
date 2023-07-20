@@ -5,5 +5,5 @@ export const transport = createConnectTransport({
   baseUrl:
     process.env.NODE_ENV === "production"
       ? process.env.TRANSPORT_URL || ""
-      : "http://localhost:3000" || "",
+      : "http://localhost:8080" || "",
 });

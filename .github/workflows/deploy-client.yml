@@ -1,0 +1,56 @@
+name: "Deploy Client"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  QRURL_APP_URL: ${{ secrets.QRURL_APP_URL }}
+
+jobs:
+  deploy:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./client
+
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Build Images
+        run: gcloud builds submit --tag asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/qrurl-client-image:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          echo TRANSPORT_URL=$QRURL_APP_URL > .env
+          gcloud run deploy \
+          --image asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/qrurl-client-image:latest \
+          --project=emahiro-dev \
+          --region=asia-northeast1 \
+          --allow-unauthenticated \
+          --cpu=2 \
+          --memory=512Mi \
+          --timeout=60 \
+          --platform manage

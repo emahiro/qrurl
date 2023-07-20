@@ -12,7 +12,7 @@ env:
   QRURL_APP_URL: ${{ secrets.QRURL_APP_URL }}
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GCP_DEPLOY_SERVICE_ACCOUNT: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
-  SERVICE_NAME: qrurl-app
+  SERVICE_NAME: qrurl-client
   REGION: asia-northeast1
 
 jobs:

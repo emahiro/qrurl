@@ -44,14 +44,15 @@ jobs:
         run: gcloud auth configure-docker
 
       - name: Build Images
-        run: docker build -t asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/qrurl-client-image:latest --platform linux/amd64 .
+        run: |
+          echo VITE_TRANSPORT_URL=$QRURL_APP_URL > .env
+          docker build -t asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/qrurl-client-image:latest --platform linux/amd64 .
 
       - name: Push Images
         run: docker push asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/qrurl-client-image:latest
 
       - name: Deploy to Cloud Run
         run: |
-          echo TRANSPORT_URL=$QRURL_APP_URL > .env
           gcloud run deploy $SERVICE_NAME \
           --project=$GCP_PROJECT_ID \
           --region=$REGION \

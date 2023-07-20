@@ -59,4 +59,4 @@ jobs:
           --cpu=2 \
           --memory=512Mi \
           --timeout=60 \
-          --platform manage
+          --platform managed

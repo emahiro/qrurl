@@ -33,13 +33,13 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// QrUrlServicePostCodeProcedure is the fully-qualified name of the QrUrlService's PostCode RPC.
-	QrUrlServicePostCodeProcedure = "/qrurl.v1.QrUrlService/PostCode"
+	// QrUrlServicePostQrCodeProcedure is the fully-qualified name of the QrUrlService's PostQrCode RPC.
+	QrUrlServicePostQrCodeProcedure = "/qrurl.v1.QrUrlService/PostQrCode"
 )
 
 // QrUrlServiceClient is a client for the qrurl.v1.QrUrlService service.
 type QrUrlServiceClient interface {
-	PostCode(context.Context, *connect_go.Request[v1.PostCodeRequest]) (*connect_go.Response[v1.PostCodeResponse], error)
+	PostQrCode(context.Context, *connect_go.Request[v1.PostQrCodeRequest]) (*connect_go.Response[v1.PostQrCodeResponse], error)
 }
 
 // NewQrUrlServiceClient constructs a client for the qrurl.v1.QrUrlService service. By default, it
@@ -52,9 +52,9 @@ type QrUrlServiceClient interface {
 func NewQrUrlServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) QrUrlServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &qrUrlServiceClient{
-		postCode: connect_go.NewClient[v1.PostCodeRequest, v1.PostCodeResponse](
+		postQrCode: connect_go.NewClient[v1.PostQrCodeRequest, v1.PostQrCodeResponse](
 			httpClient,
-			baseURL+QrUrlServicePostCodeProcedure,
+			baseURL+QrUrlServicePostQrCodeProcedure,
 			opts...,
 		),
 	}
@@ -62,17 +62,17 @@ func NewQrUrlServiceClient(httpClient connect_go.HTTPClient, baseURL string, opt
 
 // qrUrlServiceClient implements QrUrlServiceClient.
 type qrUrlServiceClient struct {
-	postCode *connect_go.Client[v1.PostCodeRequest, v1.PostCodeResponse]
+	postQrCode *connect_go.Client[v1.PostQrCodeRequest, v1.PostQrCodeResponse]
 }
 
-// PostCode calls qrurl.v1.QrUrlService.PostCode.
-func (c *qrUrlServiceClient) PostCode(ctx context.Context, req *connect_go.Request[v1.PostCodeRequest]) (*connect_go.Response[v1.PostCodeResponse], error) {
-	return c.postCode.CallUnary(ctx, req)
+// PostQrCode calls qrurl.v1.QrUrlService.PostQrCode.
+func (c *qrUrlServiceClient) PostQrCode(ctx context.Context, req *connect_go.Request[v1.PostQrCodeRequest]) (*connect_go.Response[v1.PostQrCodeResponse], error) {
+	return c.postQrCode.CallUnary(ctx, req)
 }
 
 // QrUrlServiceHandler is an implementation of the qrurl.v1.QrUrlService service.
 type QrUrlServiceHandler interface {
-	PostCode(context.Context, *connect_go.Request[v1.PostCodeRequest]) (*connect_go.Response[v1.PostCodeResponse], error)
+	PostQrCode(context.Context, *connect_go.Request[v1.PostQrCodeRequest]) (*connect_go.Response[v1.PostQrCodeResponse], error)
 }
 
 // NewQrUrlServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -82,9 +82,9 @@ type QrUrlServiceHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewQrUrlServiceHandler(svc QrUrlServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
 	mux := http.NewServeMux()
-	mux.Handle(QrUrlServicePostCodeProcedure, connect_go.NewUnaryHandler(
-		QrUrlServicePostCodeProcedure,
-		svc.PostCode,
+	mux.Handle(QrUrlServicePostQrCodeProcedure, connect_go.NewUnaryHandler(
+		QrUrlServicePostQrCodeProcedure,
+		svc.PostQrCode,
 		opts...,
 	))
 	return "/qrurl.v1.QrUrlService/", mux
@@ -93,6 +93,6 @@ func NewQrUrlServiceHandler(svc QrUrlServiceHandler, opts ...connect_go.HandlerO
 // UnimplementedQrUrlServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedQrUrlServiceHandler struct{}
 
-func (UnimplementedQrUrlServiceHandler) PostCode(context.Context, *connect_go.Request[v1.PostCodeRequest]) (*connect_go.Response[v1.PostCodeResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("qrurl.v1.QrUrlService.PostCode is not implemented"))
+func (UnimplementedQrUrlServiceHandler) PostQrCode(context.Context, *connect_go.Request[v1.PostQrCodeRequest]) (*connect_go.Response[v1.PostQrCodeResponse], error) {
+	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("qrurl.v1.QrUrlService.PostQrCode is not implemented"))
 }

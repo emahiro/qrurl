@@ -34,7 +34,7 @@ function App() {
 
   return (
     <>
-      <h1>QR Code Reader</h1>
+      <h1 className="text-3xl font-bold underline">QR Code Reader</h1>
       <div className="logoImg">
         <img src={titleImg} alt="QRコードを読み込む男性" />
       </div>

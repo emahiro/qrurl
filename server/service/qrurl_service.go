@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/base64"
 	_ "image/jpeg"
 	_ "image/png"
 
@@ -17,7 +18,11 @@ func (s *QrUrlService) PostQrCode(
 	ctx context.Context,
 	req *connect.Request[qrurlv1.PostQrCodeRequest],
 ) (resp *connect.Response[qrurlv1.PostQrCodeResponse], err error) {
-	url, err := lib.DecodeQrCode(ctx, req.Msg.Image)
+	b, err := base64.StdEncoding.DecodeString(req.Msg.Image)
+	if err != nil {
+		return nil, err
+	}
+	url, err := lib.DecodeQrCode(ctx, b)
 	if err != nil {
 		return nil, err
 	}

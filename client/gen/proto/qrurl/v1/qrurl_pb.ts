@@ -11,9 +11,11 @@ import { Message, proto3 } from "@bufbuild/protobuf";
  */
 export class PostQrCodeRequest extends Message<PostQrCodeRequest> {
   /**
-   * @generated from field: bytes image = 1;
+   * base64 encoded image
+   *
+   * @generated from field: string image = 1;
    */
-  image = new Uint8Array(0);
+  image = "";
 
   constructor(data?: PartialMessage<PostQrCodeRequest>) {
     super();
@@ -23,7 +25,7 @@ export class PostQrCodeRequest extends Message<PostQrCodeRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "qrurl.v1.PostQrCodeRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "image", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 1, name: "image", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PostQrCodeRequest {

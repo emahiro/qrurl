@@ -1,7 +1,10 @@
 import "./App.css";
+import { useState } from "react";
 import { postQrCode } from "./libs/apis/qrurl";
 
 function App() {
+  const [url, setUrl] = useState("");
+
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files?.length === 0 || files === null) {
@@ -15,7 +18,7 @@ function App() {
       const binaryStr = e.target?.result;
       const encoded = btoa(binaryStr as string);
       const resp = await postQrCode(encoded);
-      console.log(resp);
+      setUrl(resp.url);
     };
   };
 
@@ -23,6 +26,7 @@ function App() {
     <>
       <h1>QRコードリーダー</h1>
       <input type="file" accept="image/*" onChange={(e) => handleImage(e)} />
+      <p>読み込まれたURL ▶ {url}</p>
     </>
   );
 }

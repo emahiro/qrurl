@@ -1,24 +1,21 @@
 import "./App.css";
-import { Ping } from "./libs/apis/ping";
+import { postQrCode } from "./libs/apis/qrurl";
 
 function App() {
-  void Ping().then((res) => {
-    console.log(res);
-  });
-
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files?.length === 0 || files === null) {
       return;
     }
     const file = files[0];
-    console.log(file);
 
     const reader = new FileReader();
     reader.readAsArrayBuffer(file);
     reader.onload = (e) => {
       const imageBinary = e.target?.result;
       console.log(imageBinary);
+      const result = postQrCode(imageBinary as Uint8Array);
+      console.log(result);
     };
   };
 

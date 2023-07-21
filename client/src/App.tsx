@@ -34,11 +34,11 @@ function App() {
 
   return (
     <>
-      <h1 className="text-3xl font-bold underline">QR Code Reader</h1>
+      <h1 className="text-4xl font-bold">QR Code Reader</h1>
       <div className="logoImg">
         <img src={titleImg} alt="QRコードを読み込む男性" />
       </div>
-      <div>
+      <div className="qrCodeBox">
         <input type="file" accept="image/*" onChange={(e) => handleImage(e)} />
         <p>
           読み込まれたURL ▶

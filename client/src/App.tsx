@@ -34,18 +34,28 @@ function App() {
 
   return (
     <>
-      <h1 className="text-4xl font-bold">QR Code Reader</h1>
+      <h1 className="text-4xl font-bold font-mono">QR Code Reader</h1>
       <div className="logoImg">
         <img src={titleImg} alt="QRコードを読み込む男性" />
       </div>
       <div className="qrCodeBox">
-        <input type="file" accept="image/*" onChange={(e) => handleImage(e)} />
-        <p>
-          読み込まれたURL ▶
-          <a href={url} target="_blank">
+        <form>
+          <label className="block">
+            <span className="sr-only">Choose File</span>
+            <input
+              type="file"
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-gray-700 hover:file:bg-blue-100"
+              accept="image/*"
+              onChange={(e) => handleImage(e)}
+            />
+          </label>
+        </form>
+        <div className="qrCodeResult">
+          <p className="text-sm">読み込まれたURL ↓</p>
+          <a className="font-mono text-lg" href={url} target="_blank">
             {url}
           </a>
-        </p>
+        </div>
       </div>
     </>
   );

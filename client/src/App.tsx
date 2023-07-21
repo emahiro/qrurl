@@ -1,6 +1,7 @@
 import "./App.css";
 import { useState } from "react";
 import { postQrCode } from "./libs/apis/qrurl";
+import titleImg from "./assets/sp_qr_code_man.png";
 
 const urlRegex = /https?/;
 
@@ -34,13 +35,18 @@ function App() {
   return (
     <>
       <h1>QR Code Reader</h1>
-      <input type="file" accept="image/*" onChange={(e) => handleImage(e)} />
-      <p>
-        読み込まれたURL ▶
-        <a href={url} target="_blank">
-          {url}
-        </a>
-      </p>
+      <div className="logoImg">
+        <img src={titleImg} alt="QRコードを読み込む男性" />
+      </div>
+      <div>
+        <input type="file" accept="image/*" onChange={(e) => handleImage(e)} />
+        <p>
+          読み込まれたURL ▶
+          <a href={url} target="_blank">
+            {url}
+          </a>
+        </p>
+      </div>
     </>
   );
 }

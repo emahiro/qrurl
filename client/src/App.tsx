@@ -33,7 +33,7 @@ function App() {
 
   return (
     <>
-      <h1>QRコードリーダー</h1>
+      <h1>QR Code Reader</h1>
       <input type="file" accept="image/*" onChange={(e) => handleImage(e)} />
       <p>
         読み込まれたURL ▶

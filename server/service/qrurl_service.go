@@ -13,15 +13,15 @@ import (
 
 type QrUrlService struct{}
 
-func (s *QrUrlService) PostCode(
+func (s *QrUrlService) PostQrCode(
 	ctx context.Context,
-	req *connect.Request[qrurlv1.PostCodeRequest],
-) (resp *connect.Response[qrurlv1.PostCodeResponse], err error) {
+	req *connect.Request[qrurlv1.PostQrCodeRequest],
+) (resp *connect.Response[qrurlv1.PostQrCodeResponse], err error) {
 	url, err := lib.DecodeQrCode(ctx, req.Msg.Image)
 	if err != nil {
 		return nil, err
 	}
-	qrurlResp := &qrurlv1.PostCodeResponse{
+	qrurlResp := &qrurlv1.PostQrCodeResponse{
 		Url: url,
 	}
 	resp = connect.NewResponse(qrurlResp)

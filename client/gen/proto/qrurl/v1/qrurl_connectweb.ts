@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { PostCodeRequest, PostCodeResponse } from "./qrurl_pb.js";
+import { PostQrCodeRequest, PostQrCodeResponse } from "./qrurl_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -13,12 +13,12 @@ export const QrUrlService = {
   typeName: "qrurl.v1.QrUrlService",
   methods: {
     /**
-     * @generated from rpc qrurl.v1.QrUrlService.PostCode
+     * @generated from rpc qrurl.v1.QrUrlService.PostQrCode
      */
-    postCode: {
-      name: "PostCode",
-      I: PostCodeRequest,
-      O: PostCodeResponse,
+    postQrCode: {
+      name: "PostQrCode",
+      I: PostQrCodeRequest,
+      O: PostQrCodeResponse,
       kind: MethodKind.Unary,
     },
   }

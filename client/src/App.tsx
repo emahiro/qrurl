@@ -26,7 +26,12 @@ function App() {
     <>
       <h1>QRコードリーダー</h1>
       <input type="file" accept="image/*" onChange={(e) => handleImage(e)} />
-      <p>読み込まれたURL ▶ {url}</p>
+      <p>
+        読み込まれたURL ▶{" "}
+        <a href={url} target="_blank">
+          {url}
+        </a>
+      </p>
     </>
   );
 }

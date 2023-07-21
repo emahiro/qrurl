@@ -10,12 +10,12 @@ function App() {
     const file = files[0];
 
     const reader = new FileReader();
-    reader.readAsArrayBuffer(file);
-    reader.onload = (e) => {
-      const imageBinary = e.target?.result;
-      console.log(imageBinary);
-      const result = postQrCode(imageBinary as Uint8Array);
-      console.log(result);
+    reader.readAsBinaryString(file);
+    reader.onload = async (e) => {
+      const binaryStr = e.target?.result;
+      const encoded = btoa(binaryStr as string);
+      const resp = await postQrCode(encoded);
+      console.log(resp);
     };
   };
 

@@ -3,7 +3,7 @@ syntax="proto3";
 package qrurl.v1;
 
 message PostQrCodeRequest {
-  bytes image = 1;
+  string image = 1; // base64 encoded image
 }
 
 message PostQrCodeResponse {

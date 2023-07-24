@@ -80,7 +80,7 @@ func Requestf(ctx context.Context, r *http.Request) {
 	)
 }
 
-func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
+func ConnectRequestf(ctx context.Context, status int, r connect.AnyRequest) {
 	now := time.Now()
 
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
@@ -97,6 +97,7 @@ func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.HTTPMethod(),
+			Status:        status,
 			RequestUrl:    r.Spec().Procedure,
 			RequestSize:   r.Header().Get("Content-Length"),
 			UserAgent:     r.Header().Get("User-Agent"),

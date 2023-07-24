@@ -2,6 +2,7 @@ package intercepter
 
 import (
 	"context"
+	"net/http"
 	"strings"
 
 	"github.com/bufbuild/connect-go"
@@ -26,8 +27,10 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 
 			resp, err := next(ctx, req)
 			if err != nil {
+				log.ConnectRequestf(ctx, http.StatusInternalServerError, req)
 				return nil, err
 			}
+			log.ConnectRequestf(ctx, http.StatusOK, req)
 			log.Infof(ctx, "this is response info. resp: %+v", resp)
 			return resp, nil
 		}

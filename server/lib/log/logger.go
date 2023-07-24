@@ -73,6 +73,9 @@ func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 		},
 		"jsonPayload", r.Header(),
 		"time", now,
+		"logging.googleapis.com/insertId", "0",
+		"logging.googleapis.com/spanId", "0",
+		"logging.googleapis.com/trace", "0",
 	)
 }
 
@@ -83,8 +86,8 @@ func Infof(ctx context.Context, format string, args ...any) {
 		"severity", slog.LevelInfo,
 		"time", now,
 		"message", msg,
-		"insertId", "0",
-		"spanId", "0",
-		"trace", "0",
+		"logging.googleapis.com/insertId", "0",
+		"logging.googleapis.com/spanId", "0",
+		"logging.googleapis.com/trace", "0",
 	)
 }

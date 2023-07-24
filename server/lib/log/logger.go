@@ -14,6 +14,9 @@ import (
 
 var logger *slog.Logger
 
+type SpanIDKey struct{}
+type TraceIDKey struct{}
+
 func New() {
 	logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 }
@@ -38,11 +41,16 @@ type httpRequest struct {
 
 func Requestf(ctx context.Context, r *http.Request) {
 	now := time.Now()
+
+	spanID := ctx.Value(SpanIDKey{}).(string)
+	traceID := ctx.Value(TraceIDKey{}).(string)
+
 	header, err := json.Marshal(r.Header)
 	if err != nil {
 		slog.ErrorCtx(ctx, "failed to marshal header", "err", err)
 		header = []byte(`{}`)
 	}
+
 	logger.InfoCtx(ctx, "Default http request info",
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
@@ -58,13 +66,17 @@ func Requestf(ctx context.Context, r *http.Request) {
 			"httpHeader": header,
 		}),
 		slog.Time("time", now),
-		slog.String("logging.googleapis.com/spanId", "0"),
-		slog.String("logging.googleapis.com/trace", "0"),
+		slog.String("logging.googleapis.com/spanId", spanID),
+		slog.String("logging.googleapis.com/trace", traceID),
 	)
 }
 
 func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 	now := time.Now()
+
+	spanID := ctx.Value(SpanIDKey{}).(string)
+	traceID := ctx.Value(TraceIDKey{}).(string)
+
 	logger.InfoCtx(ctx, "Connect request info",
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
@@ -79,19 +91,23 @@ func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 		slog.Any("jsonPayload", map[string]any{
 			"httpHeader": r.Header(),
 		}),
-		slog.String("logging.googleapis.com/spanId", "0"),
-		slog.String("logging.googleapis.com/trace", "0"),
+		slog.String("logging.googleapis.com/spanId", spanID),
+		slog.String("logging.googleapis.com/trace", traceID),
 	)
 }
 
 func Infof(ctx context.Context, format string, args ...any) {
 	now := time.Now()
+
+	spanID := ctx.Value(SpanIDKey{}).(string)
+	traceID := ctx.Value(TraceIDKey{}).(string)
+
 	msg := fmt.Sprintf(format, args...)
 	logger.LogAttrs(ctx, slog.LevelInfo, msg,
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Time("time", now),
 		slog.String("message", msg),
-		slog.String("logging.googleapis.com/spanId", "0"),
-		slog.String("logging.googleapis.com/trace", "0"),
+		slog.String("logging.googleapis.com/spanId", spanID),
+		slog.String("logging.googleapis.com/trace", traceID),
 	)
 }

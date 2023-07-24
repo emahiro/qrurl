@@ -79,7 +79,7 @@ func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 func Infof(ctx context.Context, format string, args ...any) {
 	now := time.Now()
 	msg := fmt.Sprintf(format, args...)
-	logger.InfoCtx(ctx, msg,
+	logger.Log(ctx, slog.LevelInfo, msg,
 		"severity", slog.LevelInfo,
 		"time", now,
 		"message", msg,

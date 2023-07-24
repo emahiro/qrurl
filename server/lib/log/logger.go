@@ -43,17 +43,22 @@ func Requestf(ctx context.Context, r *http.Request) {
 		slog.ErrorCtx(ctx, "failed to marshal header", "err", err)
 		header = []byte(`{}`)
 	}
-	logger.InfoCtx(ctx, "http request info",
+	hr, err := json.Marshal(httpRequest{
+		RequestMethod: r.Method,
+		RequestUrl:    r.URL.String(),
+		RequestSize:   fmt.Sprintf("%d", r.ContentLength),
+		UserAgent:     r.UserAgent(),
+		Protocol:      r.Proto,
+		RemoteIp:      r.RemoteAddr,
+		Referer:       r.Referer(),
+	})
+	if err != nil {
+		slog.ErrorCtx(ctx, "failed to marshal httpRequest", "err", err)
+		hr = []byte(`{}`)
+	}
+	logger.InfoCtx(ctx, "Default http request info",
 		slog.String("severity", slog.LevelInfo.String()),
-		slog.Any("httpRequest", httpRequest{
-			RequestMethod: r.Method,
-			RequestUrl:    r.URL.String(),
-			RequestSize:   fmt.Sprintf("%d", r.ContentLength),
-			UserAgent:     r.UserAgent(),
-			Protocol:      r.Proto,
-			RemoteIp:      r.RemoteAddr,
-			Referer:       r.Referer(),
-		}),
+		slog.String("httpRequest", string(hr)),
 		slog.Any("jsonPayload", header),
 		slog.Time("time", now),
 	)
@@ -61,16 +66,21 @@ func Requestf(ctx context.Context, r *http.Request) {
 
 func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 	now := time.Now()
-	logger.InfoCtx(ctx, "this is connect request info",
+	hr, err := json.Marshal(httpRequest{
+		RequestMethod: r.HTTPMethod(),
+		RequestUrl:    r.Spec().Procedure,
+		RequestSize:   r.Header().Get("Content-Length"),
+		UserAgent:     r.Header().Get("User-Agent"),
+		Protocol:      r.Peer().Protocol,
+		RemoteIp:      r.Peer().Addr,
+	})
+	if err != nil {
+		slog.ErrorCtx(ctx, "failed to marshal httpRequest", "err", err)
+		hr = []byte(`{}`)
+	}
+	logger.InfoCtx(ctx, "Connect request info",
 		slog.String("severity", slog.LevelInfo.String()),
-		slog.Any("httpRequest", slog.AnyValue(httpRequest{
-			RequestMethod: r.HTTPMethod(),
-			RequestUrl:    r.Spec().Procedure,
-			RequestSize:   r.Header().Get("Content-Length"),
-			UserAgent:     r.Header().Get("User-Agent"),
-			Protocol:      r.Peer().Protocol,
-			RemoteIp:      r.Peer().Addr,
-		})),
+		slog.String("httpRequest", string(hr)),
 		slog.Any("jsonPayload", slog.AnyValue(r.Header())),
 		slog.Time("time", now),
 		slog.String("logging.googleapis.com/insertId", "0"),
@@ -85,7 +95,7 @@ func Infof(ctx context.Context, format string, args ...any) {
 	logger.LogAttrs(ctx, slog.LevelInfo, msg,
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Time("time", now),
-		slog.String("message", msg),
+		slog.String("textPayload", msg),
 		slog.String("logging.googleapis.com/insertId", "0"),
 		slog.String("logging.googleapis.com/spanId", "0"),
 		slog.String("logging.googleapis.com/trace", "0"),

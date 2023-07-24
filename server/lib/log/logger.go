@@ -70,7 +70,7 @@ func Requestf(ctx context.Context, r *http.Request) {
 		}),
 		slog.Time("time", now),
 		slog.String("logging.googleapis.com/spanId", spanID),
-		slog.String("logging.googleapis.com/trace", traceID),
+		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
 	)
 }
 
@@ -96,7 +96,7 @@ func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 			"httpHeader": r.Header(),
 		}),
 		slog.String("logging.googleapis.com/spanId", spanID),
-		slog.String("logging.googleapis.com/trace", traceID),
+		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
 	)
 }
 
@@ -113,6 +113,6 @@ func Infof(ctx context.Context, format string, args ...any) {
 		slog.Time("time", now),
 		slog.String("message", msg),
 		slog.String("logging.googleapis.com/spanId", spanID),
-		slog.String("logging.googleapis.com/trace", traceID),
+		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
 	)
 }

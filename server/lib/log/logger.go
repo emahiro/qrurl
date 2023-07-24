@@ -54,7 +54,9 @@ func Requestf(ctx context.Context, r *http.Request) {
 			RemoteIp:      r.RemoteAddr,
 			Referer:       r.Referer(),
 		}),
-		slog.Any("jsonPayload", header),
+		slog.Any("jsonPayload", map[string]any{
+			"header": header,
+		}),
 		slog.Time("time", now),
 	)
 }
@@ -71,8 +73,10 @@ func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 			Protocol:      r.Peer().Protocol,
 			RemoteIp:      r.Peer().Addr,
 		}),
-		slog.Any("jsonPayload", slog.AnyValue(r.Header())),
 		slog.Time("time", now),
+		slog.Any("jsonPayload", map[string]any{
+			"httpHeader": r.Header(),
+		}),
 		slog.String("logging.googleapis.com/insertId", "0"),
 		slog.String("logging.googleapis.com/spanId", "0"),
 		slog.String("logging.googleapis.com/trace", "0"),
@@ -85,7 +89,6 @@ func Infof(ctx context.Context, format string, args ...any) {
 	logger.LogAttrs(ctx, slog.LevelInfo, msg,
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Time("time", now),
-		slog.String("textPayload", msg),
 		slog.String("logging.googleapis.com/insertId", "0"),
 		slog.String("logging.googleapis.com/spanId", "0"),
 		slog.String("logging.googleapis.com/trace", "0"),

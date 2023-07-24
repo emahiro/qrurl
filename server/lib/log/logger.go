@@ -37,6 +37,7 @@ type httpRequest struct {
 }
 
 func Requestf(ctx context.Context, r *http.Request) {
+	now := time.Now()
 	header, err := json.Marshal(r.Header)
 	if err != nil {
 		slog.ErrorCtx(ctx, "failed to marshal header", "err", err)
@@ -54,10 +55,12 @@ func Requestf(ctx context.Context, r *http.Request) {
 			Referer:       r.Referer(),
 		},
 		"jsonPayload", header,
+		"time", now,
 	)
 }
 
 func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
+	now := time.Now()
 	logger.InfoCtx(ctx, "this is connect request info",
 		"severity", slog.LevelInfo,
 		"httpRequest", httpRequest{
@@ -69,6 +72,7 @@ func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 			RemoteIp:      r.Peer().Addr,
 		},
 		"jsonPayload", r.Header(),
+		"time", now,
 	)
 }
 
@@ -77,7 +81,7 @@ func Infof(ctx context.Context, format string, args ...any) {
 	msg := fmt.Sprintf(format, args...)
 	logger.InfoCtx(ctx, msg,
 		"severity", slog.LevelInfo,
-		"time", now.Format(time.RFC3339Nano),
+		"time", now,
 		"message", msg,
 		"insertId", "0",
 		"spanId", "0",

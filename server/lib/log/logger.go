@@ -14,6 +14,8 @@ import (
 
 var logger *slog.Logger
 
+var projectID = os.Getenv("GCP_PROJECT_ID")
+
 type SpanIDKey struct{}
 type TraceIDKey struct{}
 
@@ -52,6 +54,7 @@ func Requestf(ctx context.Context, r *http.Request) {
 	}
 
 	logger.InfoCtx(ctx, "Default http request info",
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app-http-request"),
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.Method,
@@ -78,6 +81,7 @@ func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 	traceID := ctx.Value(TraceIDKey{}).(string)
 
 	logger.InfoCtx(ctx, "Connect request info",
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app-grpc-request"),
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.HTTPMethod(),
@@ -104,6 +108,7 @@ func Infof(ctx context.Context, format string, args ...any) {
 
 	msg := fmt.Sprintf(format, args...)
 	logger.LogAttrs(ctx, slog.LevelInfo, msg,
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app"),
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Time("time", now),
 		slog.String("message", msg),

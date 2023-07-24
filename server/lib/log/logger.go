@@ -58,7 +58,6 @@ func Requestf(ctx context.Context, r *http.Request) {
 			"header": header,
 		}),
 		slog.Time("time", now),
-		slog.String("logging.googleapis.com/insertId", "0"),
 		slog.String("logging.googleapis.com/spanId", "0"),
 		slog.String("logging.googleapis.com/trace", "0"),
 	)
@@ -80,7 +79,6 @@ func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 		slog.Any("jsonPayload", map[string]any{
 			"httpHeader": r.Header(),
 		}),
-		slog.String("logging.googleapis.com/insertId", "0"),
 		slog.String("logging.googleapis.com/spanId", "0"),
 		slog.String("logging.googleapis.com/trace", "0"),
 	)
@@ -93,7 +91,6 @@ func Infof(ctx context.Context, format string, args ...any) {
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Time("time", now),
 		slog.String("message", msg),
-		slog.String("logging.googleapis.com/insertId", "0"),
 		slog.String("logging.googleapis.com/spanId", "0"),
 		slog.String("logging.googleapis.com/trace", "0"),
 	)

@@ -19,21 +19,21 @@ func New() {
 }
 
 type httpRequest struct {
-	RequestMethod                  string `json:"requestMethod"`
-	RequestUrl                     string `json:"requestUrl"`
-	RequestSize                    string `json:"requestSize"`
-	Status                         int64  `json:"status"`
-	ResponseSize                   string `json:"responseSize"`
-	UserAgent                      string `json:"userAgent"`
-	RemoteIp                       string `json:"remoteIp"`
-	ServerIp                       string `json:"serverIp"`
-	Referer                        string `json:"referer"`
-	Latency                        string `json:"latency"`
-	CacheLookup                    bool   `json:"cacheLookup"`
-	CacheHit                       bool   `json:"cacheHit"`
-	CacheValidatedWithOriginServer bool   `json:"cacheValidatedWithOriginServer"`
-	CacheFillBytes                 string `json:"cacheFillBytes"`
-	Protocol                       string `json:"protocol"`
+	RequestMethod                  string `json:"requestMethod,omitempty"`
+	RequestUrl                     string `json:"requestUrl,omitempty"`
+	RequestSize                    string `json:"requestSize,omitempty"`
+	Status                         int64  `json:"status,omitempty"`
+	ResponseSize                   string `json:"responseSize,omitempty"`
+	UserAgent                      string `json:"userAgent,omitempty"`
+	RemoteIp                       string `json:"remoteIp,omitempty"`
+	ServerIp                       string `json:"serverIp,omitempty"`
+	Referer                        string `json:"referer,omitempty"`
+	Latency                        string `json:"latency,omitempty"`
+	CacheLookup                    bool   `json:"cacheLookup,omitempty"`
+	CacheHit                       bool   `json:"cacheHit,omitempty"`
+	CacheValidatedWithOriginServer bool   `json:"cacheValidatedWithOriginServer,omitempty"`
+	CacheFillBytes                 string `json:"cacheFillBytes,omitempty"`
+	Protocol                       string `json:"protocol,omitempty"`
 }
 
 func Requestf(ctx context.Context, r *http.Request) {

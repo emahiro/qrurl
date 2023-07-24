@@ -23,9 +23,13 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 				ctx = context.WithValue(ctx, log.TraceIDKey{}, traceID)
 				ctx = context.WithValue(ctx, log.SpanIDKey{}, spanID)
 			}
-			log.Infof(ctx, "this is request info. req: %+v", req)
-			log.ConnectRequestf(ctx, req)
-			return next(ctx, req)
+
+			resp, err := next(ctx, req)
+			if err != nil {
+				return nil, err
+			}
+			log.Infof(ctx, "this is response info. resp: %+v", resp)
+			return resp, nil
 		}
 	}
 	return connect.UnaryInterceptorFunc(intercepter)

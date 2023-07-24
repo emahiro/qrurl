@@ -27,7 +27,7 @@ type httpRequest struct {
 	RequestMethod                  string `json:"requestMethod,omitempty"`
 	RequestUrl                     string `json:"requestUrl,omitempty"`
 	RequestSize                    string `json:"requestSize,omitempty"`
-	Status                         int64  `json:"status,omitempty"`
+	Status                         int    `json:"status,omitempty"`
 	ResponseSize                   string `json:"responseSize,omitempty"`
 	UserAgent                      string `json:"userAgent,omitempty"`
 	RemoteIp                       string `json:"remoteIp,omitempty"`
@@ -44,8 +44,14 @@ type httpRequest struct {
 func Requestf(ctx context.Context, r *http.Request) {
 	now := time.Now()
 
-	spanID := ctx.Value(SpanIDKey{}).(string)
-	traceID := ctx.Value(TraceIDKey{}).(string)
+	spanID, ok := ctx.Value(SpanIDKey{}).(string)
+	if !ok {
+		spanID = ""
+	}
+	traceID, ok := ctx.Value(TraceIDKey{}).(string)
+	if !ok {
+		traceID = ""
+	}
 
 	header, err := json.Marshal(r.Header)
 	if err != nil {
@@ -77,8 +83,14 @@ func Requestf(ctx context.Context, r *http.Request) {
 func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 	now := time.Now()
 
-	spanID := ctx.Value(SpanIDKey{}).(string)
-	traceID := ctx.Value(TraceIDKey{}).(string)
+	spanID, ok := ctx.Value(SpanIDKey{}).(string)
+	if !ok {
+		spanID = ""
+	}
+	traceID, ok := ctx.Value(TraceIDKey{}).(string)
+	if !ok {
+		traceID = ""
+	}
 
 	logger.InfoCtx(ctx, "Connect request info",
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app-grpc-request"),
@@ -103,8 +115,14 @@ func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 func Infof(ctx context.Context, format string, args ...any) {
 	now := time.Now()
 
-	spanID := ctx.Value(SpanIDKey{}).(string)
-	traceID := ctx.Value(TraceIDKey{}).(string)
+	spanID, ok := ctx.Value(SpanIDKey{}).(string)
+	if !ok {
+		spanID = ""
+	}
+	traceID, ok := ctx.Value(TraceIDKey{}).(string)
+	if !ok {
+		traceID = ""
+	}
 
 	msg := fmt.Sprintf(format, args...)
 	logger.LogAttrs(ctx, slog.LevelInfo, msg,

@@ -98,11 +98,12 @@ func ConnectRequestf(ctx context.Context, status int, r connect.AnyRequest) {
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.HTTPMethod(),
 			Status:        status,
-			RequestUrl:    r.Spec().Procedure,
+			RequestUrl:    r.Header().Get("Host") + r.Spec().Procedure,
 			RequestSize:   r.Header().Get("Content-Length"),
 			UserAgent:     r.Header().Get("User-Agent"),
-			Protocol:      r.Peer().Protocol,
-			RemoteIp:      r.Peer().Addr,
+			Protocol:      r.Header().Get("Protocol"),
+			RemoteIp:      r.Header().Get("X-Forwarded-For"),
+			ServerIp:      r.Peer().Addr,
 		}),
 		slog.Time("time", now),
 		slog.Any("jsonPayload", map[string]any{

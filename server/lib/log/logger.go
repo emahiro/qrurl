@@ -84,7 +84,7 @@ func ConnectRequestf(ctx context.Context, status int, r connect.AnyRequest) {
 	}
 
 	logger.InfoCtx(ctx, "Connect request info",
-		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app-grpc-request"),
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app-connect-request"),
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.HTTPMethod(),

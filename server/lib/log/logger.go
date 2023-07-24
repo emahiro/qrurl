@@ -55,7 +55,7 @@ func Requestf(ctx context.Context, r *http.Request) {
 			Referer:       r.Referer(),
 		}),
 		slog.Any("jsonPayload", map[string]any{
-			"header": header,
+			"httpHeader": header,
 		}),
 		slog.Time("time", now),
 		slog.String("logging.googleapis.com/spanId", "0"),

@@ -2,7 +2,6 @@ package log
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -53,12 +52,6 @@ func Requestf(ctx context.Context, r *http.Request) {
 		traceID = ""
 	}
 
-	header, err := json.Marshal(r.Header)
-	if err != nil {
-		slog.ErrorCtx(ctx, "failed to marshal header", "err", err)
-		header = []byte(`{}`)
-	}
-
 	logger.InfoCtx(ctx, "Default http request info",
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app-http-request"),
 		slog.String("severity", slog.LevelInfo.String()),
@@ -71,9 +64,7 @@ func Requestf(ctx context.Context, r *http.Request) {
 			RemoteIp:      r.RemoteAddr,
 			Referer:       r.Referer(),
 		}),
-		slog.Any("jsonPayload", map[string]any{
-			"httpHeader": header,
-		}),
+		slog.Any("rawHttpHeader", r.Header),
 		slog.Time("time", now),
 		slog.String("logging.googleapis.com/spanId", spanID),
 		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
@@ -106,9 +97,7 @@ func ConnectRequestf(ctx context.Context, status int, r connect.AnyRequest) {
 			ServerIp:      r.Peer().Addr,
 		}),
 		slog.Time("time", now),
-		slog.Any("jsonPayload", map[string]any{
-			"httpHeader": r.Header(),
-		}),
+		slog.Any("rawHttpHeader", r.Header()), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る
 		slog.String("logging.googleapis.com/spanId", spanID),
 		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
 	)

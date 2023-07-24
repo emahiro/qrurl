@@ -43,22 +43,17 @@ func Requestf(ctx context.Context, r *http.Request) {
 		slog.ErrorCtx(ctx, "failed to marshal header", "err", err)
 		header = []byte(`{}`)
 	}
-	hr, err := json.Marshal(httpRequest{
-		RequestMethod: r.Method,
-		RequestUrl:    r.URL.String(),
-		RequestSize:   fmt.Sprintf("%d", r.ContentLength),
-		UserAgent:     r.UserAgent(),
-		Protocol:      r.Proto,
-		RemoteIp:      r.RemoteAddr,
-		Referer:       r.Referer(),
-	})
-	if err != nil {
-		slog.ErrorCtx(ctx, "failed to marshal httpRequest", "err", err)
-		hr = []byte(`{}`)
-	}
 	logger.InfoCtx(ctx, "Default http request info",
 		slog.String("severity", slog.LevelInfo.String()),
-		slog.String("httpRequest", string(hr)),
+		slog.Any("httpRequest", httpRequest{
+			RequestMethod: r.Method,
+			RequestUrl:    r.URL.String(),
+			RequestSize:   fmt.Sprintf("%d", r.ContentLength),
+			UserAgent:     r.UserAgent(),
+			Protocol:      r.Proto,
+			RemoteIp:      r.RemoteAddr,
+			Referer:       r.Referer(),
+		}),
 		slog.Any("jsonPayload", header),
 		slog.Time("time", now),
 	)
@@ -66,21 +61,16 @@ func Requestf(ctx context.Context, r *http.Request) {
 
 func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 	now := time.Now()
-	hr, err := json.Marshal(httpRequest{
-		RequestMethod: r.HTTPMethod(),
-		RequestUrl:    r.Spec().Procedure,
-		RequestSize:   r.Header().Get("Content-Length"),
-		UserAgent:     r.Header().Get("User-Agent"),
-		Protocol:      r.Peer().Protocol,
-		RemoteIp:      r.Peer().Addr,
-	})
-	if err != nil {
-		slog.ErrorCtx(ctx, "failed to marshal httpRequest", "err", err)
-		hr = []byte(`{}`)
-	}
 	logger.InfoCtx(ctx, "Connect request info",
 		slog.String("severity", slog.LevelInfo.String()),
-		slog.String("httpRequest", string(hr)),
+		slog.Any("httpRequest", httpRequest{
+			RequestMethod: r.HTTPMethod(),
+			RequestUrl:    r.Spec().Procedure,
+			RequestSize:   r.Header().Get("Content-Length"),
+			UserAgent:     r.Header().Get("User-Agent"),
+			Protocol:      r.Peer().Protocol,
+			RemoteIp:      r.Peer().Addr,
+		}),
 		slog.Any("jsonPayload", slog.AnyValue(r.Header())),
 		slog.Time("time", now),
 		slog.String("logging.googleapis.com/insertId", "0"),

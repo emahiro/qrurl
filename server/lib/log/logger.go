@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/bufbuild/connect-go"
 	"golang.org/x/exp/slog"
 )
 
@@ -53,6 +54,21 @@ func Requestf(ctx context.Context, r *http.Request) {
 			Referer:       r.Referer(),
 		},
 		"jsonPayload", header,
+	)
+}
+
+func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
+	logger.InfoCtx(ctx, "this is connect request info",
+		"severity", slog.LevelInfo,
+		"httpRequest", httpRequest{
+			RequestMethod: r.HTTPMethod(),
+			RequestUrl:    r.Spec().Procedure,
+			RequestSize:   r.Header().Get("Content-Length"),
+			UserAgent:     r.Header().Get("User-Agent"),
+			Protocol:      r.Peer().Protocol,
+			RemoteIp:      r.Peer().Addr,
+		},
+		"jsonPayload", r.Header(),
 	)
 }
 

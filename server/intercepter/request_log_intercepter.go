@@ -11,7 +11,8 @@ import (
 func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 	intercepter := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
-			log.Infof(ctx, "request info", "method", req.HTTPMethod(), "header", req.Header())
+			log.Infof(ctx, "this is request info. req: %+v", req)
+			log.ConnectRequestf(ctx, req)
 			return next(ctx, req)
 		}
 	}

@@ -17,6 +17,7 @@ import (
 	"github.com/emahiro/qrurl/server/infra/firestore"
 	"github.com/emahiro/qrurl/server/intercepter"
 	"github.com/emahiro/qrurl/server/lib/line"
+	"github.com/emahiro/qrurl/server/lib/log"
 	"github.com/emahiro/qrurl/server/middleware"
 	"github.com/emahiro/qrurl/server/service"
 )
@@ -27,6 +28,9 @@ func main() {
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	// init logger
+	log.New()
 
 	// init line
 	if err := line.NewBot(ctx, true); err != nil {

@@ -44,8 +44,8 @@ func Requestf(ctx context.Context, r *http.Request) {
 		header = []byte(`{}`)
 	}
 	logger.InfoCtx(ctx, "http request info",
-		"severity", slog.LevelInfo,
-		"httpRequest", httpRequest{
+		slog.String("severity", slog.LevelInfo.String()),
+		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.Method,
 			RequestUrl:    r.URL.String(),
 			RequestSize:   fmt.Sprintf("%d", r.ContentLength),
@@ -53,41 +53,41 @@ func Requestf(ctx context.Context, r *http.Request) {
 			Protocol:      r.Proto,
 			RemoteIp:      r.RemoteAddr,
 			Referer:       r.Referer(),
-		},
-		"jsonPayload", header,
-		"time", now,
+		}),
+		slog.Any("jsonPayload", header),
+		slog.Time("time", now),
 	)
 }
 
 func ConnectRequestf(ctx context.Context, r connect.AnyRequest) {
 	now := time.Now()
 	logger.InfoCtx(ctx, "this is connect request info",
-		"severity", slog.LevelInfo,
-		"httpRequest", httpRequest{
+		slog.String("severity", slog.LevelInfo.String()),
+		slog.Any("httpRequest", slog.AnyValue(httpRequest{
 			RequestMethod: r.HTTPMethod(),
 			RequestUrl:    r.Spec().Procedure,
 			RequestSize:   r.Header().Get("Content-Length"),
 			UserAgent:     r.Header().Get("User-Agent"),
 			Protocol:      r.Peer().Protocol,
 			RemoteIp:      r.Peer().Addr,
-		},
-		"jsonPayload", r.Header(),
-		"time", now,
-		"logging.googleapis.com/insertId", "0",
-		"logging.googleapis.com/spanId", "0",
-		"logging.googleapis.com/trace", "0",
+		})),
+		slog.Any("jsonPayload", slog.AnyValue(r.Header())),
+		slog.Time("time", now),
+		slog.String("logging.googleapis.com/insertId", "0"),
+		slog.String("logging.googleapis.com/spanId", "0"),
+		slog.String("logging.googleapis.com/trace", "0"),
 	)
 }
 
 func Infof(ctx context.Context, format string, args ...any) {
 	now := time.Now()
 	msg := fmt.Sprintf(format, args...)
-	logger.Log(ctx, slog.LevelInfo, msg,
-		"severity", slog.LevelInfo,
-		"time", now,
-		"message", msg,
-		"logging.googleapis.com/insertId", "0",
-		"logging.googleapis.com/spanId", "0",
-		"logging.googleapis.com/trace", "0",
+	logger.LogAttrs(ctx, slog.LevelInfo, msg,
+		slog.String("severity", slog.LevelInfo.String()),
+		slog.Time("time", now),
+		slog.String("message", msg),
+		slog.String("logging.googleapis.com/insertId", "0"),
+		slog.String("logging.googleapis.com/spanId", "0"),
+		slog.String("logging.googleapis.com/trace", "0"),
 	)
 }

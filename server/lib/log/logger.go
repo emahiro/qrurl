@@ -99,6 +99,11 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 		traceID = ""
 	}
 
+	requestSize, err := json.Marshal(req)
+	if err != nil {
+		requestSize = []byte{}
+	}
+
 	respSize, err := json.Marshal(resp)
 	if err != nil {
 		respSize = []byte{}
@@ -121,7 +126,7 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 			RequestMethod: req.HTTPMethod(),
 			Status:        info.Status,
 			RequestUrl:    "https://" + req.Header().Get("Host") + req.Spec().Procedure,
-			RequestSize:   req.Header().Get("Content-Length"),
+			RequestSize:   fmt.Sprint(len(requestSize)),
 			UserAgent:     req.Header().Get("User-Agent"),
 			Protocol:      req.Header().Get("Protocol"),
 			RemoteIp:      req.Header().Get("X-Forwarded-For"),

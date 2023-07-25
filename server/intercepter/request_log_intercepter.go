@@ -35,7 +35,7 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 					Resp:        nil,
 					Status:      http.StatusInternalServerError,
 					RequestTime: requestTime,
-					Duration:    time.Until(requestTime),
+					Duration:    time.Since(requestTime),
 				})
 				return nil, err
 			}
@@ -44,7 +44,7 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 				Resp:        resp,
 				Status:      http.StatusOK,
 				RequestTime: requestTime,
-				Duration:    time.Until(requestTime),
+				Duration:    time.Since(requestTime),
 			})
 			log.Infof(ctx, "this is response info. resp: %+v", resp)
 			return resp, nil

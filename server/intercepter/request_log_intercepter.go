@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/bufbuild/connect-go"
 
@@ -13,6 +14,8 @@ import (
 func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 	intercepter := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
+			requestTime := time.Now()
+
 			xcTraceCtx := req.Header().Get("X-Cloud-Trace-Context")
 			var traceID, spanID string
 			if xcTraceCtx != "" {
@@ -27,10 +30,22 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 
 			resp, err := next(ctx, req)
 			if err != nil {
-				log.ConnectRequestf(ctx, http.StatusInternalServerError, req, nil)
+				log.ConnectRequestf(ctx, log.ConnectRequestInfo{
+					Req:         req,
+					Resp:        nil,
+					Status:      http.StatusInternalServerError,
+					RequestTime: requestTime,
+					Duration:    time.Until(requestTime),
+				})
 				return nil, err
 			}
-			log.ConnectRequestf(ctx, http.StatusOK, req, resp)
+			log.ConnectRequestf(ctx, log.ConnectRequestInfo{
+				Req:         req,
+				Resp:        resp,
+				Status:      http.StatusOK,
+				RequestTime: requestTime,
+				Duration:    time.Until(requestTime),
+			})
 			log.Infof(ctx, "this is response info. resp: %+v", resp)
 			return resp, nil
 		}

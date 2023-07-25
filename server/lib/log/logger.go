@@ -24,21 +24,26 @@ func New() {
 }
 
 type httpRequest struct {
-	RequestMethod                  string `json:"requestMethod,omitempty"`
-	RequestUrl                     string `json:"requestUrl,omitempty"`
-	RequestSize                    string `json:"requestSize,omitempty"`
-	Status                         int    `json:"status,omitempty"`
-	ResponseSize                   string `json:"responseSize,omitempty"`
-	UserAgent                      string `json:"userAgent,omitempty"`
-	RemoteIp                       string `json:"remoteIp,omitempty"`
-	ServerIp                       string `json:"serverIp,omitempty"`
-	Referer                        string `json:"referer,omitempty"`
-	Latency                        string `json:"latency,omitempty"`
-	CacheLookup                    bool   `json:"cacheLookup,omitempty"`
-	CacheHit                       bool   `json:"cacheHit,omitempty"`
-	CacheValidatedWithOriginServer bool   `json:"cacheValidatedWithOriginServer,omitempty"`
-	CacheFillBytes                 string `json:"cacheFillBytes,omitempty"`
-	Protocol                       string `json:"protocol,omitempty"`
+	RequestMethod                  string   `json:"requestMethod,omitempty"`
+	RequestUrl                     string   `json:"requestUrl,omitempty"`
+	RequestSize                    string   `json:"requestSize,omitempty"`
+	Status                         int      `json:"status,omitempty"`
+	ResponseSize                   string   `json:"responseSize,omitempty"`
+	UserAgent                      string   `json:"userAgent,omitempty"`
+	RemoteIp                       string   `json:"remoteIp,omitempty"`
+	ServerIp                       string   `json:"serverIp,omitempty"`
+	Referer                        string   `json:"referer,omitempty"`
+	Latency                        duration `json:"latency,omitempty"`
+	CacheLookup                    bool     `json:"cacheLookup,omitempty"`
+	CacheHit                       bool     `json:"cacheHit,omitempty"`
+	CacheValidatedWithOriginServer bool     `json:"cacheValidatedWithOriginServer,omitempty"`
+	CacheFillBytes                 string   `json:"cacheFillBytes,omitempty"`
+	Protocol                       string   `json:"protocol,omitempty"`
+}
+
+type duration struct {
+	Nanos   int32 `json:"nanos,omitempty"`
+	Seconds int64 `json:"seconds,omitempty"`
 }
 
 func Requestf(ctx context.Context, r *http.Request) {
@@ -72,8 +77,18 @@ func Requestf(ctx context.Context, r *http.Request) {
 	)
 }
 
-func ConnectRequestf(ctx context.Context, status int, req connect.AnyRequest, resp connect.AnyResponse) {
+type ConnectRequestInfo struct {
+	Status      int
+	RequestTime time.Time
+	Duration    time.Duration
+	Req         connect.AnyRequest
+	Resp        connect.AnyResponse
+}
+
+func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 	now := time.Now()
+	req := info.Req
+	resp := info.Resp
 
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
 	if !ok {
@@ -88,12 +103,23 @@ func ConnectRequestf(ctx context.Context, status int, req connect.AnyRequest, re
 	if err != nil {
 		respSize = []byte{}
 	}
+
+	makeDuration := func(d time.Duration) duration {
+		nanos := d.Nanoseconds()
+		secs := nanos / 1e9
+		nanos -= secs * 1e9
+		return duration{
+			Nanos:   int32(nanos),
+			Seconds: secs,
+		}
+	}
+
 	logger.InfoCtx(ctx, "Connect request info",
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app-connect-request"),
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: req.HTTPMethod(),
-			Status:        status,
+			Status:        info.Status,
 			RequestUrl:    req.Header().Get("Host") + req.Spec().Procedure,
 			RequestSize:   req.Header().Get("Content-Length"),
 			UserAgent:     req.Header().Get("User-Agent"),
@@ -101,6 +127,7 @@ func ConnectRequestf(ctx context.Context, status int, req connect.AnyRequest, re
 			RemoteIp:      req.Header().Get("X-Forwarded-For"),
 			ServerIp:      req.Peer().Addr,
 			ResponseSize:  fmt.Sprint(len(respSize)),
+			Latency:       makeDuration(info.Duration),
 		}),
 		slog.Time("time", now),
 		slog.Any("rawHttpHeader", req.Header()), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る

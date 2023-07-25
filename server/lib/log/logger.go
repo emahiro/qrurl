@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -71,7 +72,7 @@ func Requestf(ctx context.Context, r *http.Request) {
 	)
 }
 
-func ConnectRequestf(ctx context.Context, status int, r connect.AnyRequest) {
+func ConnectRequestf(ctx context.Context, status int, req connect.AnyRequest, resp connect.AnyResponse) {
 	now := time.Now()
 
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
@@ -83,21 +84,26 @@ func ConnectRequestf(ctx context.Context, status int, r connect.AnyRequest) {
 		traceID = ""
 	}
 
+	respSize, err := json.Marshal(resp)
+	if err != nil {
+		respSize = []byte{}
+	}
 	logger.InfoCtx(ctx, "Connect request info",
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app-connect-request"),
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
-			RequestMethod: r.HTTPMethod(),
+			RequestMethod: req.HTTPMethod(),
 			Status:        status,
-			RequestUrl:    r.Header().Get("Host") + r.Spec().Procedure,
-			RequestSize:   r.Header().Get("Content-Length"),
-			UserAgent:     r.Header().Get("User-Agent"),
-			Protocol:      r.Header().Get("Protocol"),
-			RemoteIp:      r.Header().Get("X-Forwarded-For"),
-			ServerIp:      r.Peer().Addr,
+			RequestUrl:    req.Header().Get("Host") + req.Spec().Procedure,
+			RequestSize:   req.Header().Get("Content-Length"),
+			UserAgent:     req.Header().Get("User-Agent"),
+			Protocol:      req.Header().Get("Protocol"),
+			RemoteIp:      req.Header().Get("X-Forwarded-For"),
+			ServerIp:      req.Peer().Addr,
+			ResponseSize:  fmt.Sprint(len(respSize)),
 		}),
 		slog.Time("time", now),
-		slog.Any("rawHttpHeader", r.Header()), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る
+		slog.Any("rawHttpHeader", req.Header()), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る
 		slog.String("logging.googleapis.com/spanId", spanID),
 		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
 	)

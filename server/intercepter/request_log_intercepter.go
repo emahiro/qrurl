@@ -27,10 +27,10 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 
 			resp, err := next(ctx, req)
 			if err != nil {
-				log.ConnectRequestf(ctx, http.StatusInternalServerError, req)
+				log.ConnectRequestf(ctx, http.StatusInternalServerError, req, nil)
 				return nil, err
 			}
-			log.ConnectRequestf(ctx, http.StatusOK, req)
+			log.ConnectRequestf(ctx, http.StatusOK, req, resp)
 			log.Infof(ctx, "this is response info. resp: %+v", resp)
 			return resp, nil
 		}

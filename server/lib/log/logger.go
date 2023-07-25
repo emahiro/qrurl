@@ -120,7 +120,7 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: req.HTTPMethod(),
 			Status:        info.Status,
-			RequestUrl:    req.Header().Get("Host") + req.Spec().Procedure,
+			RequestUrl:    "https://" + req.Header().Get("Host") + req.Spec().Procedure,
 			RequestSize:   req.Header().Get("Content-Length"),
 			UserAgent:     req.Header().Get("User-Agent"),
 			Protocol:      req.Header().Get("Protocol"),

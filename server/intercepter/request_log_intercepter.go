@@ -39,14 +39,15 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 				})
 				return nil, err
 			}
-			log.ConnectRequestf(ctx, log.ConnectRequestInfo{
-				Req:         req,
-				Resp:        resp,
-				Status:      http.StatusOK,
-				RequestTime: requestTime,
-				Duration:    time.Since(requestTime),
-			})
-			log.Infof(ctx, "this is response info. resp: %+v", resp)
+			defer func() {
+				log.ConnectRequestf(ctx, log.ConnectRequestInfo{
+					Req:         req,
+					Resp:        resp,
+					Status:      http.StatusOK,
+					RequestTime: requestTime,
+					Duration:    time.Since(requestTime),
+				})
+			}()
 			return resp, nil
 		}
 	}

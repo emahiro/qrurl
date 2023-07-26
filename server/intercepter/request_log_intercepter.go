@@ -15,6 +15,7 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 	intercepter := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
 			requestTime := time.Now()
+			resultStatus := http.StatusOK
 
 			xcTraceCtx := req.Header().Get("X-Cloud-Trace-Context")
 			var traceID, spanID string
@@ -30,24 +31,27 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 
 			resp, err := next(ctx, req)
 			if err != nil {
+				if err, ok := err.(*connect.Error); ok {
+					switch err.Code() {
+					case connect.CodeUnknown:
+						resultStatus = http.StatusInternalServerError
+					default:
+						// error code の分類分け
+						resultStatus = http.StatusBadRequest
+					}
+				}
+			}
+			// 終了後に Logging する
+			defer func() {
 				log.ConnectRequestf(ctx, log.ConnectRequestInfo{
 					Req:         req,
-					Resp:        nil,
-					Status:      http.StatusInternalServerError,
+					Resp:        resp,
+					Status:      resultStatus,
 					RequestTime: requestTime,
 					Duration:    time.Since(requestTime),
 				})
-				return nil, err
-			}
-			log.ConnectRequestf(ctx, log.ConnectRequestInfo{
-				Req:         req,
-				Resp:        resp,
-				Status:      http.StatusOK,
-				RequestTime: requestTime,
-				Duration:    time.Since(requestTime),
-			})
-			log.Infof(ctx, "this is response info. resp: %+v", resp)
-			return resp, nil
+			}()
+			return resp, err
 		}
 	}
 	return connect.UnaryInterceptorFunc(intercepter)

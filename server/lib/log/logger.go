@@ -60,7 +60,7 @@ func Requestf(ctx context.Context, r *http.Request) {
 	}
 
 	logger.InfoCtx(ctx, "Default http request info",
-		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app-http-request"),
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FhttpRequestLog"),
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.Method,
@@ -121,7 +121,7 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 	}
 
 	logger.InfoCtx(ctx, "Connect request info",
-		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app-connect-request"),
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FconnectRequestLog"),
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: req.HTTPMethod(),
@@ -156,7 +156,7 @@ func Infof(ctx context.Context, format string, args ...any) {
 
 	msg := fmt.Sprintf(format, args...)
 	logger.LogAttrs(ctx, slog.LevelInfo, msg,
-		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app"),
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FinfoLog"),
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Time("time", now),
 		slog.String("message", msg),

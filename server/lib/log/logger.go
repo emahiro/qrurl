@@ -12,6 +12,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+// this is qrurl logger.
 var logger *slog.Logger
 
 var projectID = os.Getenv("GCP_PROJECT_ID")

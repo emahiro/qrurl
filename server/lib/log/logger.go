@@ -1,9 +1,11 @@
 package log
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -59,23 +61,35 @@ func Requestf(ctx context.Context, r *http.Request) {
 		traceID = ""
 	}
 
-	logger.InfoCtx(ctx, "Default http request info",
-		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FhttpRequestLog"),
-		slog.String("severity", slog.LevelInfo.String()),
-		slog.Any("httpRequest", httpRequest{
-			RequestMethod: r.Method,
-			RequestUrl:    r.URL.String(),
-			RequestSize:   fmt.Sprintf("%d", r.ContentLength),
-			UserAgent:     r.UserAgent(),
-			Protocol:      r.Proto,
-			RemoteIp:      r.RemoteAddr,
-			Referer:       r.Referer(),
-		}),
-		slog.Any("rawHttpHeader", r.Header),
-		slog.Time("time", now),
-		slog.String("logging.googleapis.com/spanId", spanID),
-		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
-	)
+	copyReq := r.Clone(ctx)
+	rb, err := io.ReadAll(copyReq.Body)
+	if err != nil {
+		rb = []byte{}
+	}
+	defer copyReq.Body.Close()
+	requestSize := fmt.Sprintf("%d", len(rb))
+
+	defer func() {
+		logger.InfoCtx(ctx, "Default http request info",
+			slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FhttpRequestLog"),
+			slog.String("severity", slog.LevelInfo.String()),
+			slog.Any("httpRequest", httpRequest{
+				RequestMethod: r.Method,
+				RequestUrl:    r.URL.String(),
+				RequestSize:   requestSize,
+				UserAgent:     r.UserAgent(),
+				Protocol:      r.Proto,
+				RemoteIp:      r.RemoteAddr,
+				Referer:       r.Referer(),
+			}),
+			slog.Any("rawHttpHeader", r.Header),
+			slog.Time("time", now),
+			slog.String("logging.googleapis.com/spanId", spanID),
+			slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
+		)
+		r.Body = io.NopCloser(bytes.NewBuffer(rb))
+	}()
+
 }
 
 type ConnectRequestInfo struct {

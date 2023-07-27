@@ -1,11 +1,9 @@
 package log
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"time"
@@ -49,7 +47,7 @@ type duration struct {
 	Seconds int64 `json:"seconds,omitempty"`
 }
 
-func Requestf(ctx context.Context, r *http.Request) {
+func Requestf(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
@@ -61,13 +59,15 @@ func Requestf(ctx context.Context, r *http.Request) {
 		traceID = ""
 	}
 
-	copyReq := r.Clone(ctx)
-	rb, err := io.ReadAll(copyReq.Body)
+	requestSize := fmt.Sprint(r.ContentLength)
+
+	// response size を取得する
+	var wb []byte
+	n, err := rw.Write(wb)
 	if err != nil {
-		rb = []byte{}
+		n = 0
 	}
-	defer copyReq.Body.Close()
-	requestSize := fmt.Sprintf("%d", len(rb))
+	responseSize := fmt.Sprint(n)
 
 	defer func() {
 		logger.InfoCtx(ctx, "Default http request info",
@@ -77,6 +77,7 @@ func Requestf(ctx context.Context, r *http.Request) {
 				RequestMethod: r.Method,
 				RequestUrl:    r.URL.String(),
 				RequestSize:   requestSize,
+				ResponseSize:  responseSize,
 				UserAgent:     r.UserAgent(),
 				Protocol:      r.Proto,
 				RemoteIp:      r.RemoteAddr,
@@ -87,7 +88,6 @@ func Requestf(ctx context.Context, r *http.Request) {
 			slog.String("logging.googleapis.com/spanId", spanID),
 			slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
 		)
-		r.Body = io.NopCloser(bytes.NewBuffer(rb))
 	}()
 
 }

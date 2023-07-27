@@ -47,6 +47,16 @@ type duration struct {
 	Seconds int64 `json:"seconds,omitempty"`
 }
 
+func makeDuration(d time.Duration) duration {
+	nanos := d.Nanoseconds()
+	secs := nanos / 1e9
+	nanos -= secs * 1e9
+	return duration{
+		Nanos:   int32(nanos),
+		Seconds: secs,
+	}
+}
+
 func Requestf(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 
@@ -124,16 +134,6 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 		respSize = []byte{}
 	}
 
-	makeDuration := func(d time.Duration) duration {
-		nanos := d.Nanoseconds()
-		secs := nanos / 1e9
-		nanos -= secs * 1e9
-		return duration{
-			Nanos:   int32(nanos),
-			Seconds: secs,
-		}
-	}
-
 	logger.InfoCtx(ctx, "Connect request info",
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FconnectRequestLog"),
 		slog.String("severity", slog.LevelInfo.String()),
@@ -149,7 +149,7 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 			ResponseSize:  fmt.Sprint(len(respSize)),
 			Latency:       makeDuration(info.Duration),
 		}),
-		slog.Time("time", now),
+		slog.Time("time", info.RequestTime),
 		slog.Any("rawHttpHeader", req.Header()), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る
 		slog.String("logging.googleapis.com/spanId", spanID),
 		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),

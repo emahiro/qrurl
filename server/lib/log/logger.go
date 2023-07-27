@@ -85,28 +85,25 @@ func Requestf(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 	}
 	duration := makeDuration(time.Since(requestTime))
 
-	defer func() {
-		logger.InfoCtx(ctx, "Default http request info",
-			slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FhttpRequestLog"),
-			slog.String("severity", slog.LevelInfo.String()),
-			slog.Any("httpRequest", httpRequest{
-				RequestMethod: r.Method,
-				RequestUrl:    r.URL.String(),
-				RequestSize:   requestSize,
-				ResponseSize:  responseSize,
-				UserAgent:     r.UserAgent(),
-				Protocol:      r.Proto,
-				RemoteIp:      r.RemoteAddr,
-				Referer:       r.Referer(),
-				Latency:       duration,
-			}),
-			slog.Any("rawHttpHeader", r.Header),
-			slog.Time("time", requestTime),
-			slog.String("logging.googleapis.com/spanId", spanID),
-			slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
-		)
-	}()
-
+	logger.InfoCtx(ctx, "Default http request info",
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FhttpRequestLog"),
+		slog.String("severity", slog.LevelInfo.String()),
+		slog.Any("httpRequest", httpRequest{
+			RequestMethod: r.Method,
+			RequestUrl:    r.URL.String(),
+			RequestSize:   requestSize,
+			ResponseSize:  responseSize,
+			UserAgent:     r.UserAgent(),
+			Protocol:      r.Proto,
+			RemoteIp:      r.RemoteAddr,
+			Referer:       r.Referer(),
+			Latency:       duration,
+		}),
+		slog.Any("rawHttpHeader", r.Header),
+		slog.Time("time", requestTime),
+		slog.String("logging.googleapis.com/spanId", spanID),
+		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
+	)
 }
 
 type ConnectRequestInfo struct {

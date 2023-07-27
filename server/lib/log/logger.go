@@ -19,6 +19,7 @@ var projectID = os.Getenv("GCP_PROJECT_ID")
 
 type SpanIDKey struct{}
 type TraceIDKey struct{}
+type RequestTimeKey struct{}
 
 func New() {
 	logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
@@ -58,7 +59,6 @@ func makeDuration(d time.Duration) duration {
 }
 
 func Requestf(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
-	now := time.Now()
 
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
 	if !ok {
@@ -79,6 +79,12 @@ func Requestf(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 	}
 	responseSize := fmt.Sprint(n)
 
+	requestTime, ok := ctx.Value(RequestTimeKey{}).(time.Time)
+	if !ok {
+		requestTime = time.Now()
+	}
+	duration := makeDuration(time.Since(requestTime))
+
 	defer func() {
 		logger.InfoCtx(ctx, "Default http request info",
 			slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FhttpRequestLog"),
@@ -92,9 +98,10 @@ func Requestf(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 				Protocol:      r.Proto,
 				RemoteIp:      r.RemoteAddr,
 				Referer:       r.Referer(),
+				Latency:       duration,
 			}),
 			slog.Any("rawHttpHeader", r.Header),
-			slog.Time("time", now),
+			slog.Time("time", requestTime),
 			slog.String("logging.googleapis.com/spanId", spanID),
 			slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
 		)

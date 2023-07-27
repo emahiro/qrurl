@@ -51,6 +51,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	middleware.Chain(mux,
+		middleware.RequestLog,
 		middleware.VerifyChannelAccessToken,
 		middleware.VerifyLine,
 	)

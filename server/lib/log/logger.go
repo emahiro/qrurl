@@ -118,7 +118,6 @@ type ConnectRequestInfo struct {
 }
 
 func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
-	now := time.Now()
 	req := info.Req
 	resp := info.Resp
 

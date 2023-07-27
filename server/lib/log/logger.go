@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/bufbuild/connect-go"
@@ -58,7 +59,28 @@ func makeDuration(d time.Duration) duration {
 	}
 }
 
-func Requestf(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+type HTTPRequestLogResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+	size       uint64
+}
+
+func NewLogHTTPResponseWriter(rw http.ResponseWriter) *HTTPRequestLogResponseWriter {
+	return &HTTPRequestLogResponseWriter{rw, http.StatusOK, 0}
+}
+
+func (lrw *HTTPRequestLogResponseWriter) WriteHeader(code int) {
+	lrw.statusCode = code
+	lrw.ResponseWriter.WriteHeader(code)
+}
+
+func (lrw *HTTPRequestLogResponseWriter) Write(buf []byte) (int, error) {
+	n, err := lrw.ResponseWriter.Write(buf)
+	atomic.AddUint64(&lrw.size, uint64(n))
+	return n, err
+}
+
+func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Request) {
 
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
 	if !ok {
@@ -73,11 +95,10 @@ func Requestf(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 
 	// response size を取得する
 	var wb []byte
-	n, err := rw.Write(wb)
-	if err != nil {
-		n = 0
+	if _, err := rw.Write(wb); err != nil {
+		rw.size = 0
 	}
-	responseSize := fmt.Sprint(n)
+	responseSize := fmt.Sprint(rw.size)
 
 	requestTime, ok := ctx.Value(RequestTimeKey{}).(time.Time)
 	if !ok {
@@ -90,6 +111,7 @@ func Requestf(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.Method,
+			Status:        rw.statusCode,
 			RequestUrl:    r.URL.String(),
 			RequestSize:   requestSize,
 			ResponseSize:  responseSize,

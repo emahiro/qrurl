@@ -94,8 +94,7 @@ func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Req
 	requestSize := fmt.Sprint(r.ContentLength)
 
 	// response size を取得する
-	var wb []byte
-	if _, err := rw.Write(wb); err != nil {
+	if _, err := rw.Write([]byte{}); err != nil {
 		rw.size = 0
 	}
 	responseSize := fmt.Sprint(rw.size)

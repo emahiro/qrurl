@@ -22,10 +22,11 @@ import (
 var client *linebot.Client
 
 func NewBot(ctx context.Context, useLongTermToken bool) error {
-	at := os.Getenv("LINE_CHANNEL_ACCESS_TOKEN")
+	var at string
 	if !useLongTermToken {
 		repo := repository.LineChannelAccessTokenRepository{}
-		at, err := repo.GetLatestAccessToken(ctx)
+		var err error
+		at, err = repo.GetLatestAccessToken(ctx)
 		if err != nil {
 			return err
 		}
@@ -34,12 +35,13 @@ func NewBot(ctx context.Context, useLongTermToken bool) error {
 			return err
 		}
 		if !valid {
-			t, err := PostChannelAccessToken(ctx)
+			at, err = PostChannelAccessToken(ctx)
 			if err != nil {
 				return err
 			}
-			at = t
 		}
+	} else {
+		at = os.Getenv("LINE_CHANNEL_ACCESS_TOKEN")
 	}
 
 	if err := NewBotClient(at); err != nil {

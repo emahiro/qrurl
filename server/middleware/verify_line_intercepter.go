@@ -12,10 +12,9 @@ import (
 
 var lineMessageChannelSecret = os.Getenv("LINE_MESSAGE_CHANNEL_SECRET")
 
-func VerifyLine(http.Handler) http.Handler {
+func VerifyLine(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, origReq *http.Request) {
 		ctx := origReq.Context()
-
 		copyReq := origReq.Clone(ctx)
 		b, err := io.ReadAll(copyReq.Body)
 		if err != nil {
@@ -37,7 +36,7 @@ func VerifyLine(http.Handler) http.Handler {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-
 		origReq.Body = io.NopCloser(bytes.NewBuffer(b))
+		next.ServeHTTP(w, origReq)
 	})
 }

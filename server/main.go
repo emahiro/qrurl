@@ -50,15 +50,10 @@ func main() {
 	})
 
 	mux := http.NewServeMux()
-	mwchain := middleware.Chain(mux,
-		middleware.RequestLog,
-	)
-	mux.Handle("/v1/webhook/line", middleware.Chain(mux, middleware.VerifyLine, middleware.VerifyChannelAccessToken, func(h http.Handler) http.Handler {
-		return http.HandlerFunc(handler.LineWebHookHandler)
-	}))
-	mux.Handle("/ping", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "{\"message\": \"pong\"}}")
-	}))
+	mwchain := middleware.Chain(mux, middleware.RequestLog)
+
+	mux.Handle("/v1/webhook/line", middleware.Chain(http.HandlerFunc(handler.LineWebHookHandler), middleware.VerifyChannelAccessToken, middleware.VerifyLine))
+	mux.Handle("/ping", middleware.Chain(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{\"message\": \"pong\"}}") })))
 
 	intercepters := connect.WithInterceptors(
 		intercepter.NewRequestLogIntercepter(),

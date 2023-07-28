@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -14,6 +15,8 @@ import (
 
 func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
+	fmt.Println("this is line webhook handler")
 
 	v := line.LineWebhookRequest{}
 	decorder := json.NewDecoder(r.Body)

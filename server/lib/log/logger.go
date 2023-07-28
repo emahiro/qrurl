@@ -111,7 +111,7 @@ func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Req
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.Method,
 			Status:        rw.statusCode,
-			RequestUrl:    r.URL.String(),
+			RequestUrl:    "https://" + r.Host + r.URL.String(),
 			RequestSize:   requestSize,
 			ResponseSize:  responseSize,
 			UserAgent:     r.UserAgent(),

@@ -56,6 +56,9 @@ func main() {
 		middleware.VerifyLine,
 	)
 	mux.HandleFunc("/v1/webhook/line", handler.LineWebHookHandler)
+	mux.Handle("/ping", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "{\"message\": \"pong\"}}")
+	}))
 
 	intercepters := connect.WithInterceptors(
 		intercepter.NewRequestLogIntercepter(),

@@ -22,7 +22,10 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 				tmp := strings.Split(xcTraceCtx, "/")
 				if len(tmp) == 2 {
 					traceID = tmp[0]
-					spanID = tmp[1]
+					spanIDStr := strings.Split(tmp[1], ";")
+					if len(spanIDStr) == 2 {
+						spanID = spanIDStr[0]
+					}
 				}
 				ctx = context.WithValue(ctx, log.TraceIDKey{}, traceID)
 				ctx = context.WithValue(ctx, log.SpanIDKey{}, spanID)

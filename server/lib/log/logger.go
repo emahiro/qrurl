@@ -1,8 +1,10 @@
 package log
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/binary"
+	"encoding/gob"
 	"fmt"
 	"net/http"
 	"os"
@@ -57,6 +59,15 @@ func makeDuration(d time.Duration) duration {
 		Nanos:   int32(nanos),
 		Seconds: secs,
 	}
+}
+
+func binarySize(v any) int {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(v); err != nil {
+		return 0
+	}
+	return binary.Size(buf.Bytes())
 }
 
 type HTTPRequestLogResponseWriter struct {
@@ -151,16 +162,6 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 		requestTime = time.Now()
 	}
 
-	requestSize, err := json.Marshal(req)
-	if err != nil {
-		requestSize = []byte{}
-	}
-
-	respSize, err := json.Marshal(resp)
-	if err != nil {
-		respSize = []byte{}
-	}
-
 	logger.InfoCtx(ctx, "Connect request info",
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FconnectRequestLog"),
 		slog.String("severity", slog.LevelInfo.String()),
@@ -168,12 +169,12 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 			RequestMethod: req.HTTPMethod(),
 			Status:        info.Status,
 			RequestUrl:    "https://" + req.Header().Get("Host") + req.Spec().Procedure,
-			RequestSize:   fmt.Sprint(len(requestSize)),
+			RequestSize:   fmt.Sprint(binarySize(req)),
 			UserAgent:     req.Header().Get("User-Agent"),
 			Protocol:      req.Header().Get("Protocol"),
 			RemoteIp:      req.Header().Get("X-Forwarded-For"),
 			ServerIp:      req.Peer().Addr,
-			ResponseSize:  fmt.Sprint(len(respSize)),
+			ResponseSize:  fmt.Sprint(binarySize(resp)),
 			Latency:       makeDuration(time.Since(requestTime)),
 		}),
 		slog.Time("time", requestTime),

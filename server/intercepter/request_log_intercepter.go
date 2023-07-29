@@ -14,8 +14,7 @@ import (
 func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 	intercepter := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) {
-			requestTime := time.Now()
-			resultStatus := http.StatusOK
+			ctx = context.WithValue(ctx, log.RequestTimeKey{}, time.Now())
 
 			xcTraceCtx := req.Header().Get("X-Cloud-Trace-Context")
 			var traceID, spanID string
@@ -23,11 +22,16 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 				tmp := strings.Split(xcTraceCtx, "/")
 				if len(tmp) == 2 {
 					traceID = tmp[0]
-					spanID = tmp[1]
+					spanIDStr := strings.Split(tmp[1], ";")
+					if len(spanIDStr) == 2 {
+						spanID = spanIDStr[0]
+					}
 				}
 				ctx = context.WithValue(ctx, log.TraceIDKey{}, traceID)
 				ctx = context.WithValue(ctx, log.SpanIDKey{}, spanID)
 			}
+
+			resultStatus := http.StatusOK
 
 			resp, err := next(ctx, req)
 			if err != nil {
@@ -44,11 +48,9 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 			// 終了後に Logging する
 			defer func() {
 				log.ConnectRequestf(ctx, log.ConnectRequestInfo{
-					Req:         req,
-					Resp:        resp,
-					Status:      resultStatus,
-					RequestTime: requestTime,
-					Duration:    time.Since(requestTime),
+					Req:    req,
+					Resp:   resp,
+					Status: resultStatus,
 				})
 			}()
 			return resp, err

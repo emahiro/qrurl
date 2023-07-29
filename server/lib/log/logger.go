@@ -1,11 +1,14 @@
 package log
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/binary"
+	"encoding/gob"
 	"fmt"
 	"net/http"
 	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/bufbuild/connect-go"
@@ -19,6 +22,7 @@ var projectID = os.Getenv("GCP_PROJECT_ID")
 
 type SpanIDKey struct{}
 type TraceIDKey struct{}
+type RequestTimeKey struct{}
 
 func New() {
 	logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
@@ -47,8 +51,47 @@ type duration struct {
 	Seconds int64 `json:"seconds,omitempty"`
 }
 
-func Requestf(ctx context.Context, r *http.Request) {
-	now := time.Now()
+func makeDuration(d time.Duration) duration {
+	nanos := d.Nanoseconds()
+	secs := nanos / 1e9
+	nanos -= secs * 1e9
+	return duration{
+		Nanos:   int32(nanos),
+		Seconds: secs,
+	}
+}
+
+func binarySize(v any) int {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(v); err != nil {
+		return 0
+	}
+	return binary.Size(buf.Bytes())
+}
+
+type HTTPRequestLogResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+	size       uint64
+}
+
+func NewLogHTTPResponseWriter(rw http.ResponseWriter) *HTTPRequestLogResponseWriter {
+	return &HTTPRequestLogResponseWriter{rw, http.StatusOK, 0}
+}
+
+func (lrw *HTTPRequestLogResponseWriter) WriteHeader(code int) {
+	lrw.statusCode = code
+	lrw.ResponseWriter.WriteHeader(code)
+}
+
+func (lrw *HTTPRequestLogResponseWriter) Write(buf []byte) (int, error) {
+	n, err := lrw.ResponseWriter.Write(buf)
+	atomic.AddUint64(&lrw.size, uint64(n))
+	return n, err
+}
+
+func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Request) {
 
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
 	if !ok {
@@ -59,35 +102,49 @@ func Requestf(ctx context.Context, r *http.Request) {
 		traceID = ""
 	}
 
+	requestSize := fmt.Sprint(r.ContentLength)
+
+	// response size を取得する
+	if _, err := rw.Write([]byte{}); err != nil {
+		rw.size = 0
+	}
+	responseSize := fmt.Sprint(rw.size)
+
+	requestTime, ok := ctx.Value(RequestTimeKey{}).(time.Time)
+	if !ok {
+		requestTime = time.Now()
+	}
+	duration := makeDuration(time.Since(requestTime))
+
 	logger.InfoCtx(ctx, "Default http request info",
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FhttpRequestLog"),
 		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.Method,
-			RequestUrl:    r.URL.String(),
-			RequestSize:   fmt.Sprintf("%d", r.ContentLength),
+			Status:        rw.statusCode,
+			RequestUrl:    "https://" + r.Host + r.URL.String(),
+			RequestSize:   requestSize,
+			ResponseSize:  responseSize,
 			UserAgent:     r.UserAgent(),
 			Protocol:      r.Proto,
 			RemoteIp:      r.RemoteAddr,
 			Referer:       r.Referer(),
+			Latency:       duration,
 		}),
 		slog.Any("rawHttpHeader", r.Header),
-		slog.Time("time", now),
+		slog.Time("time", requestTime),
 		slog.String("logging.googleapis.com/spanId", spanID),
 		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
 	)
 }
 
 type ConnectRequestInfo struct {
-	Status      int
-	RequestTime time.Time
-	Duration    time.Duration
-	Req         connect.AnyRequest
-	Resp        connect.AnyResponse
+	Status int
+	Req    connect.AnyRequest
+	Resp   connect.AnyResponse
 }
 
 func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
-	now := time.Now()
 	req := info.Req
 	resp := info.Resp
 
@@ -100,24 +157,9 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 		traceID = ""
 	}
 
-	requestSize, err := json.Marshal(req)
-	if err != nil {
-		requestSize = []byte{}
-	}
-
-	respSize, err := json.Marshal(resp)
-	if err != nil {
-		respSize = []byte{}
-	}
-
-	makeDuration := func(d time.Duration) duration {
-		nanos := d.Nanoseconds()
-		secs := nanos / 1e9
-		nanos -= secs * 1e9
-		return duration{
-			Nanos:   int32(nanos),
-			Seconds: secs,
-		}
+	requestTime, ok := ctx.Value(RequestTimeKey{}).(time.Time)
+	if !ok {
+		requestTime = time.Now()
 	}
 
 	logger.InfoCtx(ctx, "Connect request info",
@@ -127,15 +169,15 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 			RequestMethod: req.HTTPMethod(),
 			Status:        info.Status,
 			RequestUrl:    "https://" + req.Header().Get("Host") + req.Spec().Procedure,
-			RequestSize:   fmt.Sprint(len(requestSize)),
+			RequestSize:   fmt.Sprint(binarySize(req)),
 			UserAgent:     req.Header().Get("User-Agent"),
 			Protocol:      req.Header().Get("Protocol"),
 			RemoteIp:      req.Header().Get("X-Forwarded-For"),
 			ServerIp:      req.Peer().Addr,
-			ResponseSize:  fmt.Sprint(len(respSize)),
-			Latency:       makeDuration(info.Duration),
+			ResponseSize:  fmt.Sprint(binarySize(resp)),
+			Latency:       makeDuration(time.Since(requestTime)),
 		}),
-		slog.Time("time", now),
+		slog.Time("time", requestTime),
 		slog.Any("rawHttpHeader", req.Header()), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る
 		slog.String("logging.googleapis.com/spanId", spanID),
 		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),

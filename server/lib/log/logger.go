@@ -128,11 +128,9 @@ func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Req
 }
 
 type ConnectRequestInfo struct {
-	Status      int
-	RequestTime time.Time
-	Duration    time.Duration
-	Req         connect.AnyRequest
-	Resp        connect.AnyResponse
+	Status int
+	Req    connect.AnyRequest
+	Resp   connect.AnyResponse
 }
 
 func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
@@ -146,6 +144,11 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 	traceID, ok := ctx.Value(TraceIDKey{}).(string)
 	if !ok {
 		traceID = ""
+	}
+
+	requestTime, ok := ctx.Value(RequestTimeKey{}).(time.Time)
+	if !ok {
+		requestTime = time.Now()
 	}
 
 	requestSize, err := json.Marshal(req)
@@ -171,9 +174,9 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 			RemoteIp:      req.Header().Get("X-Forwarded-For"),
 			ServerIp:      req.Peer().Addr,
 			ResponseSize:  fmt.Sprint(len(respSize)),
-			Latency:       makeDuration(info.Duration),
+			Latency:       makeDuration(time.Since(requestTime)),
 		}),
-		slog.Time("time", info.RequestTime),
+		slog.Time("time", requestTime),
 		slog.Any("rawHttpHeader", req.Header()), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る
 		slog.String("logging.googleapis.com/spanId", spanID),
 		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),

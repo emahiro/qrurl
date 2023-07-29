@@ -50,10 +50,8 @@ func main() {
 	})
 
 	mux := http.NewServeMux()
-	mwchain := middleware.Chain(mux, middleware.RequestLog)
-
-	mux.Handle("/v1/webhook/line", middleware.Chain(http.HandlerFunc(handler.LineWebHookHandler), middleware.VerifyChannelAccessToken, middleware.VerifyLine))
-	mux.Handle("/ping", middleware.Chain(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{\"message\": \"pong\"}}") })))
+	mux.Handle("/v1/webhook/line", middleware.Chain(http.HandlerFunc(handler.LineWebHookHandler), middleware.VerifyChannelAccessToken, middleware.VerifyLine, middleware.RequestLog))
+	mux.Handle("/ping", middleware.Chain(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{\"message\": \"pong\"}}") }), middleware.RequestLog))
 
 	intercepters := connect.WithInterceptors(
 		intercepter.NewRequestLogIntercepter(),
@@ -63,7 +61,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    addr,
-		Handler: c.Handler(h2c.NewHandler(mwchain, &http2.Server{})),
+		Handler: c.Handler(h2c.NewHandler(mux, &http2.Server{})),
 	}
 	go func() {
 		<-ctx.Done()

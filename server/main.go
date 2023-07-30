@@ -57,7 +57,7 @@ func main() {
 		http.HandlerFunc(handler.LineWebHookHandler),
 		append(mws, middleware.VerifyChannelAccessToken, middleware.VerifyLine)...,
 	))
-	mux.Handle("/ping", middleware.Chain(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{\"message\": \"pong\"}}") }), mws...))
+	mux.Handle("/ping", middleware.Chain(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { fmt.Fprintf(w, "{\"message\": \"pong\"}}") }), mws...))
 
 	intercepters := connect.WithInterceptors(
 		intercepter.NewRequestLogIntercepter(),

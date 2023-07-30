@@ -7,7 +7,6 @@ import (
 
 	"github.com/bufbuild/connect-go"
 	"github.com/rs/cors"
-	"golang.org/x/exp/slog"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
@@ -34,12 +33,12 @@ func main() {
 
 	// init line
 	if err := line.NewBot(ctx, true); err != nil {
-		slog.ErrorCtx(ctx, "failed to init line bot", "err", err)
+		log.Errorf(ctx, "failed to init line bot. err: %v", err)
 		panic(err)
 	}
 	// init firestore
 	if err := firestore.New(ctx); err != nil {
-		slog.ErrorCtx(ctx, "failed to init firestore", "err", err)
+		log.Errorf(ctx, "failed to init firestore. err: %v", err)
 		panic(err)
 	}
 
@@ -77,7 +76,7 @@ func main() {
 		}
 	}()
 
-	slog.InfoCtx(ctx, "server start", "port", fmt.Sprintf("localhost%s", addr))
+	log.Infof(ctx, "server start! port: %v", fmt.Sprintf("localhost%s", addr))
 	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}

@@ -3,7 +3,6 @@ package intercepter
 import (
 	"context"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/bufbuild/connect-go"
@@ -17,18 +16,8 @@ func NewRequestLogIntercepter() connect.UnaryInterceptorFunc {
 			ctx = context.WithValue(ctx, log.RequestTimeKey{}, time.Now())
 
 			xcTraceCtx := req.Header().Get("X-Cloud-Trace-Context")
-			var traceID, spanID string
 			if xcTraceCtx != "" {
-				tmp := strings.Split(xcTraceCtx, "/")
-				if len(tmp) == 2 {
-					traceID = tmp[0]
-					spanIDStr := strings.Split(tmp[1], ";")
-					if len(spanIDStr) == 2 {
-						spanID = spanIDStr[0]
-					}
-				}
-				ctx = context.WithValue(ctx, log.TraceIDKey{}, traceID)
-				ctx = context.WithValue(ctx, log.SpanIDKey{}, spanID)
+				ctx = log.SetCloudTraceContext(ctx, xcTraceCtx)
 			}
 
 			resultStatus := http.StatusOK

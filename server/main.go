@@ -49,9 +49,16 @@ func main() {
 		AllowedHeaders: []string{"*"},
 	})
 
+	mws := []func(http.Handler) http.Handler{
+		middleware.SetTrace,
+		middleware.RequestLog,
+	}
 	mux := http.NewServeMux()
-	mux.Handle("/v1/webhook/line", middleware.Chain(http.HandlerFunc(handler.LineWebHookHandler), middleware.VerifyChannelAccessToken, middleware.VerifyLine, middleware.RequestLog))
-	mux.Handle("/ping", middleware.Chain(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{\"message\": \"pong\"}}") }), middleware.RequestLog))
+	mux.Handle("/v1/webhook/line", middleware.Chain(
+		http.HandlerFunc(handler.LineWebHookHandler),
+		append(mws, []func(http.Handler) http.Handler{middleware.VerifyChannelAccessToken, middleware.VerifyLine}...)...,
+	))
+	mux.Handle("/ping", middleware.Chain(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{\"message\": \"pong\"}}") }), mws...))
 
 	intercepters := connect.WithInterceptors(
 		intercepter.NewRequestLogIntercepter(),

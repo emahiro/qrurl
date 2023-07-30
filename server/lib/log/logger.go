@@ -91,6 +91,17 @@ func (lrw *HTTPRequestLogResponseWriter) Write(buf []byte) (int, error) {
 	return n, err
 }
 
+func defaultLogAttrs(severity slog.Level, traceID, spanID, message string) []slog.Attr {
+	now := time.Now()
+	return []slog.Attr{
+		slog.String("severity", severity.String()),
+		slog.Time("time", now),
+		slog.String("message", message),
+		slog.String("logging.googleapis.com/spanId", spanID),
+		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
+	}
+}
+
 func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Request) {
 
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
@@ -184,18 +195,6 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 	)
 }
 
-func defaultLogAttrs(severity slog.Level, traceID, spanID, message string) []slog.Attr {
-	now := time.Now()
-	return []slog.Attr{
-		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FdefaultLog"),
-		slog.String("severity", severity.String()),
-		slog.Time("time", now),
-		slog.String("message", message),
-		slog.String("logging.googleapis.com/spanId", spanID),
-		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
-	}
-}
-
 func Infof(ctx context.Context, format string, args ...any) {
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
 	if !ok {
@@ -219,5 +218,10 @@ func Errorf(ctx context.Context, format string, args ...any) {
 		traceID = ""
 	}
 	msg := fmt.Sprintf(format, args...)
-	logger.LogAttrs(ctx, slog.LevelError, msg, defaultLogAttrs(slog.LevelError, traceID, spanID, msg)...)
+	attrs := append(
+		defaultLogAttrs(slog.LevelError, traceID, spanID, msg),
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FErrorLog"),
+	)
+	logger.LogAttrs(ctx, slog.LevelError, msg, attrs...)
+
 }

@@ -91,6 +91,15 @@ func (lrw *HTTPRequestLogResponseWriter) Write(buf []byte) (int, error) {
 	return n, err
 }
 
+func defaultLogAttrs(severity slog.Level, traceID, spanID, message string) []slog.Attr {
+	return []slog.Attr{
+		slog.String("severity", severity.String()),
+		slog.String("message", message),
+		slog.String("logging.googleapis.com/spanId", spanID),
+		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
+	}
+}
+
 func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Request) {
 
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
@@ -116,9 +125,11 @@ func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Req
 	}
 	duration := makeDuration(time.Since(requestTime))
 
-	logger.InfoCtx(ctx, "Default http request info",
+	msg := "Default http request info"
+	attrs := append(
+		defaultLogAttrs(slog.LevelInfo, traceID, spanID, msg),
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FhttpRequestLog"),
-		slog.String("severity", slog.LevelInfo.String()),
+		slog.Time("time", requestTime),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.Method,
 			Status:        rw.statusCode,
@@ -131,11 +142,9 @@ func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Req
 			Referer:       r.Referer(),
 			Latency:       duration,
 		}),
-		slog.Any("rawHttpHeader", r.Header),
-		slog.Time("time", requestTime),
-		slog.String("logging.googleapis.com/spanId", spanID),
-		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
+		slog.Any("rawHttpHeader", r.Header), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る
 	)
+	logger.LogAttrs(ctx, slog.LevelInfo, msg, attrs...)
 }
 
 type ConnectRequestInfo struct {
@@ -162,9 +171,10 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 		requestTime = time.Now()
 	}
 
-	logger.InfoCtx(ctx, "Connect request info",
+	msg := "Connect request info"
+	attrs := append(
+		defaultLogAttrs(slog.LevelInfo, traceID, spanID, msg),
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FconnectRequestLog"),
-		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: req.HTTPMethod(),
 			Status:        info.Status,
@@ -179,14 +189,11 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 		}),
 		slog.Time("time", requestTime),
 		slog.Any("rawHttpHeader", req.Header()), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る
-		slog.String("logging.googleapis.com/spanId", spanID),
-		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
 	)
+	logger.LogAttrs(ctx, slog.LevelInfo, msg, attrs...)
 }
 
 func Infof(ctx context.Context, format string, args ...any) {
-	now := time.Now()
-
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
 	if !ok {
 		spanID = ""
@@ -195,14 +202,30 @@ func Infof(ctx context.Context, format string, args ...any) {
 	if !ok {
 		traceID = ""
 	}
-
 	msg := fmt.Sprintf(format, args...)
-	logger.LogAttrs(ctx, slog.LevelInfo, msg,
-		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FinfoLog"),
-		slog.String("severity", slog.LevelInfo.String()),
-		slog.Time("time", now),
-		slog.String("message", msg),
-		slog.String("logging.googleapis.com/spanId", spanID),
-		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
+	attrs := append(
+		defaultLogAttrs(slog.LevelInfo, traceID, spanID, msg),
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FErrorLog"),
+		slog.Time("time", time.Now()),
 	)
+	logger.LogAttrs(ctx, slog.LevelInfo, msg, attrs...)
+}
+
+func Errorf(ctx context.Context, format string, args ...any) {
+	spanID, ok := ctx.Value(SpanIDKey{}).(string)
+	if !ok {
+		spanID = ""
+	}
+	traceID, ok := ctx.Value(TraceIDKey{}).(string)
+	if !ok {
+		traceID = ""
+	}
+	msg := fmt.Sprintf(format, args...)
+	attrs := append(
+		defaultLogAttrs(slog.LevelError, traceID, spanID, msg),
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FErrorLog"),
+		slog.Time("time", time.Now()),
+	)
+	logger.LogAttrs(ctx, slog.LevelError, msg, attrs...)
+
 }

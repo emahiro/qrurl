@@ -56,7 +56,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/v1/webhook/line", middleware.Chain(
 		http.HandlerFunc(handler.LineWebHookHandler),
-		append(mws, []func(http.Handler) http.Handler{middleware.VerifyChannelAccessToken, middleware.VerifyLine}...)...,
+		append(mws, middleware.VerifyChannelAccessToken, middleware.VerifyLine)...,
 	))
 	mux.Handle("/ping", middleware.Chain(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{\"message\": \"pong\"}}") }), mws...))
 

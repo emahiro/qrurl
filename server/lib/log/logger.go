@@ -184,9 +184,19 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 	)
 }
 
-func Infof(ctx context.Context, format string, args ...any) {
+func defaultLogAttrs(severity slog.Level, traceID, spanID, message string) []slog.Attr {
 	now := time.Now()
+	return []slog.Attr{
+		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FdefaultLog"),
+		slog.String("severity", severity.String()),
+		slog.Time("time", now),
+		slog.String("message", message),
+		slog.String("logging.googleapis.com/spanId", spanID),
+		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
+	}
+}
 
+func Infof(ctx context.Context, format string, args ...any) {
 	spanID, ok := ctx.Value(SpanIDKey{}).(string)
 	if !ok {
 		spanID = ""
@@ -195,14 +205,19 @@ func Infof(ctx context.Context, format string, args ...any) {
 	if !ok {
 		traceID = ""
 	}
-
 	msg := fmt.Sprintf(format, args...)
-	logger.LogAttrs(ctx, slog.LevelInfo, msg,
-		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FinfoLog"),
-		slog.String("severity", slog.LevelInfo.String()),
-		slog.Time("time", now),
-		slog.String("message", msg),
-		slog.String("logging.googleapis.com/spanId", spanID),
-		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
-	)
+	logger.LogAttrs(ctx, slog.LevelInfo, msg, defaultLogAttrs(slog.LevelInfo, traceID, spanID, msg)...)
+}
+
+func Errorf(ctx context.Context, format string, args ...any) {
+	spanID, ok := ctx.Value(SpanIDKey{}).(string)
+	if !ok {
+		spanID = ""
+	}
+	traceID, ok := ctx.Value(TraceIDKey{}).(string)
+	if !ok {
+		traceID = ""
+	}
+	msg := fmt.Sprintf(format, args...)
+	logger.LogAttrs(ctx, slog.LevelError, msg, defaultLogAttrs(slog.LevelError, traceID, spanID, msg)...)
 }

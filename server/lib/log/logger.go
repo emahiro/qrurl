@@ -125,9 +125,11 @@ func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Req
 	}
 	duration := makeDuration(time.Since(requestTime))
 
-	logger.InfoCtx(ctx, "Default http request info",
+	msg := "Default http request info"
+	attrs := append(
+		defaultLogAttrs(slog.LevelInfo, traceID, spanID, msg),
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FhttpRequestLog"),
-		slog.String("severity", slog.LevelInfo.String()),
+		slog.Time("time", requestTime),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: r.Method,
 			Status:        rw.statusCode,
@@ -140,11 +142,9 @@ func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Req
 			Referer:       r.Referer(),
 			Latency:       duration,
 		}),
-		slog.Any("rawHttpHeader", r.Header),
-		slog.Time("time", requestTime),
-		slog.String("logging.googleapis.com/spanId", spanID),
-		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
+		slog.Any("rawHttpHeader", r.Header), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る
 	)
+	logger.LogAttrs(ctx, slog.LevelInfo, msg, attrs...)
 }
 
 type ConnectRequestInfo struct {
@@ -171,9 +171,10 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 		requestTime = time.Now()
 	}
 
-	logger.InfoCtx(ctx, "Connect request info",
+	msg := "Connect request info"
+	attrs := append(
+		defaultLogAttrs(slog.LevelInfo, traceID, spanID, msg),
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FconnectRequestLog"),
-		slog.String("severity", slog.LevelInfo.String()),
 		slog.Any("httpRequest", httpRequest{
 			RequestMethod: req.HTTPMethod(),
 			Status:        info.Status,
@@ -188,9 +189,8 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 		}),
 		slog.Time("time", requestTime),
 		slog.Any("rawHttpHeader", req.Header()), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る
-		slog.String("logging.googleapis.com/spanId", spanID),
-		slog.String("logging.googleapis.com/trace", "projects/"+projectID+"/traces/"+traceID),
 	)
+	logger.LogAttrs(ctx, slog.LevelInfo, msg, attrs...)
 }
 
 func Infof(ctx context.Context, format string, args ...any) {

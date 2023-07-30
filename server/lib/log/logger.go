@@ -13,6 +13,7 @@ import (
 
 	"github.com/bufbuild/connect-go"
 	"golang.org/x/exp/slog"
+	"google.golang.org/protobuf/types/known/durationpb"
 )
 
 // this is qrurl logger.
@@ -29,36 +30,21 @@ func New() {
 }
 
 type httpRequest struct {
-	RequestMethod                  string   `json:"requestMethod,omitempty"`
-	RequestUrl                     string   `json:"requestUrl,omitempty"`
-	RequestSize                    string   `json:"requestSize,omitempty"`
-	Status                         int      `json:"status,omitempty"`
-	ResponseSize                   string   `json:"responseSize,omitempty"`
-	UserAgent                      string   `json:"userAgent,omitempty"`
-	RemoteIp                       string   `json:"remoteIp,omitempty"`
-	ServerIp                       string   `json:"serverIp,omitempty"`
-	Referer                        string   `json:"referer,omitempty"`
-	Latency                        duration `json:"latency,omitempty"`
-	CacheLookup                    bool     `json:"cacheLookup,omitempty"`
-	CacheHit                       bool     `json:"cacheHit,omitempty"`
-	CacheValidatedWithOriginServer bool     `json:"cacheValidatedWithOriginServer,omitempty"`
-	CacheFillBytes                 string   `json:"cacheFillBytes,omitempty"`
-	Protocol                       string   `json:"protocol,omitempty"`
-}
-
-type duration struct {
-	Nanos   int32 `json:"nanos,omitempty"`
-	Seconds int64 `json:"seconds,omitempty"`
-}
-
-func makeDuration(d time.Duration) duration {
-	nanos := d.Nanoseconds()
-	secs := nanos / 1e9
-	nanos -= secs * 1e9
-	return duration{
-		Nanos:   int32(nanos),
-		Seconds: secs,
-	}
+	RequestMethod                  string               `json:"requestMethod,omitempty"`
+	RequestUrl                     string               `json:"requestUrl,omitempty"`
+	RequestSize                    string               `json:"requestSize,omitempty"`
+	Status                         int                  `json:"status,omitempty"`
+	ResponseSize                   string               `json:"responseSize,omitempty"`
+	UserAgent                      string               `json:"userAgent,omitempty"`
+	RemoteIp                       string               `json:"remoteIp,omitempty"`
+	ServerIp                       string               `json:"serverIp,omitempty"`
+	Referer                        string               `json:"referer,omitempty"`
+	Latency                        *durationpb.Duration `json:"latency,omitempty"`
+	CacheLookup                    bool                 `json:"cacheLookup,omitempty"`
+	CacheHit                       bool                 `json:"cacheHit,omitempty"`
+	CacheValidatedWithOriginServer bool                 `json:"cacheValidatedWithOriginServer,omitempty"`
+	CacheFillBytes                 string               `json:"cacheFillBytes,omitempty"`
+	Protocol                       string               `json:"protocol,omitempty"`
 }
 
 func binarySize(v any) int {
@@ -123,7 +109,6 @@ func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Req
 	if !ok {
 		requestTime = time.Now()
 	}
-	duration := makeDuration(time.Since(requestTime))
 
 	msg := "Default http request info"
 	attrs := append(
@@ -140,7 +125,7 @@ func Requestf(ctx context.Context, rw *HTTPRequestLogResponseWriter, r *http.Req
 			Protocol:      r.Proto,
 			RemoteIp:      r.RemoteAddr,
 			Referer:       r.Referer(),
-			Latency:       duration,
+			Latency:       durationpb.New(time.Since(requestTime)),
 		}),
 		slog.Any("rawHttpHeader", r.Header), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る
 	)
@@ -185,7 +170,7 @@ func ConnectRequestf(ctx context.Context, info ConnectRequestInfo) {
 			RemoteIp:      req.Header().Get("X-Forwarded-For"),
 			ServerIp:      req.Peer().Addr,
 			ResponseSize:  fmt.Sprint(binarySize(resp)),
-			Latency:       makeDuration(time.Since(requestTime)),
+			Latency:       durationpb.New(time.Since(requestTime)),
 		}),
 		slog.Time("time", requestTime),
 		slog.Any("rawHttpHeader", req.Header()), // ドキュメントに記載されてないフィールドは jsonPayload の内部に自動的に入る

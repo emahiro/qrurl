@@ -3,7 +3,6 @@ package line
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -11,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cockroachdb/errors"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"golang.org/x/exp/slog"
 
@@ -94,7 +94,7 @@ func CheckIfTokenValid(ctx context.Context, token string) (bool, error) {
 func PostChannelAccessToken(ctx context.Context) (string, error) {
 	token, err := jwt.CreateToken(ctx)
 	if err != nil {
-		return "", err
+		return "", errors.WithHint(err, "failed to create jwt token")
 	}
 	slog.InfoCtx(context.Background(), "token", "jwt", token)
 
@@ -106,27 +106,27 @@ func PostChannelAccessToken(ctx context.Context) (string, error) {
 
 	req, err := http.NewRequest(http.MethodPost, "https://api.line.me/oauth2/v2.1/token", b)
 	if err != nil {
-		return "", err
+		return "", errors.WithHint(err, "failed to create request")
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		return "", errors.WithHint(err, "failed to request")
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= http.StatusBadRequest {
 		bb, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return "", err
+			return "", errors.WithHint(err, "failed to read response body")
 		}
 		slog.InfoCtx(context.Background(), "token response body", "err", string(bb))
-		return "", errors.New(string(bb))
+		return "", errors.WithHintf(err, "token response status code is %d body: %v", resp.StatusCode, string(bb))
 	}
 
 	var v PostChannelAccessTokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
-		return "", err
+		return "", errors.WithHint(err, "failed to decode response body")
 	}
 
 	// persist token process

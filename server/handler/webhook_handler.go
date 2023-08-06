@@ -10,6 +10,7 @@ import (
 
 	"github.com/emahiro/qrurl/server/lib"
 	"github.com/emahiro/qrurl/server/lib/line"
+	"github.com/emahiro/qrurl/server/lib/log"
 )
 
 func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +22,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		if err := decorder.Decode(&v); err == io.EOF {
 			break
 		} else if err != nil {
-			slog.ErrorCtx(ctx, "request body parse error", "err", err)
+			log.Errorf(ctx, "decode error. err: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}

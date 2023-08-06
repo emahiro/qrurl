@@ -12,9 +12,9 @@ import (
 
 	"github.com/cockroachdb/errors"
 	"github.com/line/line-bot-sdk-go/v7/linebot"
-	"golang.org/x/exp/slog"
 
 	"github.com/emahiro/qrurl/server/lib/jwt"
+	"github.com/emahiro/qrurl/server/lib/log"
 	"github.com/emahiro/qrurl/server/repository"
 )
 
@@ -80,7 +80,7 @@ func CheckIfTokenValid(ctx context.Context, token string) (bool, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		slog.InfoCtx(ctx, "invalid access-token and regenerate line bot client")
+		log.Infof(ctx, "invalid access-token and regenerate line bot client")
 		return false, nil
 	}
 	return true, nil
@@ -96,7 +96,7 @@ func PostChannelAccessToken(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", errors.WithHint(err, "failed to create jwt token")
 	}
-	slog.InfoCtx(context.Background(), "token", "jwt", token)
+	log.Infof(context.Background(), "token: %s", token)
 
 	form := url.Values{}
 	form.Set("grant_type", "client_credentials")
@@ -120,7 +120,7 @@ func PostChannelAccessToken(ctx context.Context) (string, error) {
 		if err != nil {
 			return "", errors.WithHint(err, "failed to read response body")
 		}
-		slog.InfoCtx(context.Background(), "token response body", "err", string(bb))
+		log.Infof(context.Background(), "token response body. err: %v", string(bb))
 		return "", errors.WithHintf(err, "token response status code is %d body: %v", resp.StatusCode, string(bb))
 	}
 
@@ -141,7 +141,7 @@ func PostChannelAccessToken(ctx context.Context) (string, error) {
 		CreatedAt:       now,
 		UpdatedAt:       now,
 	}); err != nil {
-		return "", err
+		return "", errors.WithHint(err, "failed to persist token")
 	}
 
 	return v.AccessToken, nil
@@ -190,13 +190,13 @@ type PostChannelAccessTokenResponse struct {
 func GetMessageContent(_ context.Context, messageID string) ([]byte, error) {
 	resp, err := client.GetMessageContent(messageID).Do()
 	if err != nil {
-		return nil, err
+		return nil, errors.WithHintf(err, "failed to get message content. messageID: %s", messageID)
 	}
 	defer resp.Content.Close()
 
 	b, err := io.ReadAll(resp.Content)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithHintf(err, "failed to read message content. messageID: %s", messageID)
 	}
 	return b, nil
 }
@@ -206,7 +206,7 @@ func ReplyMessage(_ context.Context, replyToken string, text string) error {
 		linebot.NewTextMessage(text),
 	}
 	if _, err := client.ReplyMessage(replyToken, messages...).Do(); err != nil {
-		return err
+		return errors.WithHintf(err, "failed to reply message. replyToken: %s", replyToken)
 	}
 	return nil
 }

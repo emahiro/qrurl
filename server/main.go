@@ -76,7 +76,7 @@ func main() {
 		}
 	}()
 
-	log.Infof(ctx, "server start! port: %v", fmt.Sprintf("localhost%s", addr))
+	log.Infof(ctx, "server start! port: %v", "localhost"+addr)
 	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}

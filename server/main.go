@@ -33,12 +33,12 @@ func main() {
 
 	// init line
 	if err := line.NewBot(ctx, true); err != nil {
-		log.Errorf(ctx, "failed to init line bot. err: %v", err)
+		log.Errorf(ctx, "failed to init line bot. err: %+v", err)
 		panic(err)
 	}
 	// init firestore
 	if err := firestore.New(ctx); err != nil {
-		log.Errorf(ctx, "failed to init firestore. err: %v", err)
+		log.Errorf(ctx, "failed to init firestore. err: %+v", err)
 		panic(err)
 	}
 

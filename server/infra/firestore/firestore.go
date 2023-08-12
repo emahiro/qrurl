@@ -7,6 +7,8 @@ import (
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
 	"google.golang.org/api/iterator"
+
+	"github.com/emahiro/qrurl/server/lib/log"
 )
 
 var client *firestore.Client
@@ -15,12 +17,12 @@ func New(ctx context.Context) error {
 	conf := &firebase.Config{ProjectID: os.Getenv("GCP_PROJECT_ID")}
 	app, err := firebase.NewApp(ctx, conf)
 	if err != nil {
-		return err
+		return log.WithStackTracef(err, "failed to initialize firebase app")
 	}
 
 	c, err := app.Firestore(ctx)
 	if err != nil {
-		return err
+		return log.WithStackTracef(err, "failed to initialize firestore client")
 	}
 	client = c
 	return nil

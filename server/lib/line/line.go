@@ -3,7 +3,6 @@ package line
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -12,9 +11,9 @@ import (
 	"time"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
-	"golang.org/x/exp/slog"
 
 	"github.com/emahiro/qrurl/server/lib/jwt"
+	"github.com/emahiro/qrurl/server/lib/log"
 	"github.com/emahiro/qrurl/server/repository"
 )
 
@@ -80,7 +79,7 @@ func CheckIfTokenValid(ctx context.Context, token string) (bool, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		slog.InfoCtx(ctx, "invalid access-token and regenerate line bot client")
+		log.Infof(ctx, "invalid access-token and regenerate line bot client")
 		return false, nil
 	}
 	return true, nil
@@ -94,9 +93,9 @@ func CheckIfTokenValid(ctx context.Context, token string) (bool, error) {
 func PostChannelAccessToken(ctx context.Context) (string, error) {
 	token, err := jwt.CreateToken(ctx)
 	if err != nil {
-		return "", err
+		return "", log.WithStackTracef(err, "failed to create jwt token")
 	}
-	slog.InfoCtx(context.Background(), "token", "jwt", token)
+	log.Infof(context.Background(), "token: %s", token)
 
 	form := url.Values{}
 	form.Set("grant_type", "client_credentials")
@@ -106,27 +105,27 @@ func PostChannelAccessToken(ctx context.Context) (string, error) {
 
 	req, err := http.NewRequest(http.MethodPost, "https://api.line.me/oauth2/v2.1/token", b)
 	if err != nil {
-		return "", err
+		return "", log.WithStackTracef(err, "failed to create request")
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		return "", log.WithStackTracef(err, "failed to request")
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= http.StatusBadRequest {
 		bb, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return "", err
+			return "", log.WithStackTracef(err, "failed to read response body")
 		}
-		slog.InfoCtx(context.Background(), "token response body", "err", string(bb))
-		return "", errors.New(string(bb))
+		log.Infof(context.Background(), "token response body. err: %v", string(bb))
+		return "", log.WithStackTracef(err, "token response status code is %d body: %v", resp.StatusCode, string(bb))
 	}
 
 	var v PostChannelAccessTokenResponse
 	if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
-		return "", err
+		return "", log.WithStackTracef(err, "failed to decode response body")
 	}
 
 	// persist token process
@@ -141,7 +140,7 @@ func PostChannelAccessToken(ctx context.Context) (string, error) {
 		CreatedAt:       now,
 		UpdatedAt:       now,
 	}); err != nil {
-		return "", err
+		return "", log.WithStackTracef(err, "failed to persist token")
 	}
 
 	return v.AccessToken, nil
@@ -190,13 +189,13 @@ type PostChannelAccessTokenResponse struct {
 func GetMessageContent(_ context.Context, messageID string) ([]byte, error) {
 	resp, err := client.GetMessageContent(messageID).Do()
 	if err != nil {
-		return nil, err
+		return nil, log.WithStackTracef(err, "failed to get message content. messageID: %s", messageID)
 	}
 	defer resp.Content.Close()
 
 	b, err := io.ReadAll(resp.Content)
 	if err != nil {
-		return nil, err
+		return nil, log.WithStackTracef(err, "failed to read message content. messageID: %s", messageID)
 	}
 	return b, nil
 }
@@ -206,7 +205,7 @@ func ReplyMessage(_ context.Context, replyToken string, text string) error {
 		linebot.NewTextMessage(text),
 	}
 	if _, err := client.ReplyMessage(replyToken, messages...).Do(); err != nil {
-		return err
+		return log.WithStackTracef(err, "failed to reply message. replyToken: %s", replyToken)
 	}
 	return nil
 }

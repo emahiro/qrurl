@@ -10,6 +10,7 @@ import (
 
 	qrurlv1 "github.com/emahiro/qrurl/server/gen/proto/qrurl/v1"
 	"github.com/emahiro/qrurl/server/lib"
+	"github.com/emahiro/qrurl/server/lib/log"
 )
 
 type QrUrlService struct{}
@@ -20,11 +21,11 @@ func (s *QrUrlService) PostQrCode(
 ) (resp *connect.Response[qrurlv1.PostQrCodeResponse], err error) {
 	b, err := base64.StdEncoding.DecodeString(req.Msg.Image)
 	if err != nil {
-		return nil, err
+		return nil, log.WithStackTracef(err, "decode error. image: %v", req.Msg.Image)
 	}
 	url, err := lib.DecodeQrCode(ctx, b)
 	if err != nil {
-		return nil, err
+		return nil, log.WithStackTracef(err, "decode error. image: %v", req.Msg.Image)
 	}
 	qrurlResp := &qrurlv1.PostQrCodeResponse{
 		Url: url,

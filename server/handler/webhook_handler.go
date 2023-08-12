@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
-	"golang.org/x/exp/slog"
 
 	"github.com/emahiro/qrurl/server/lib"
 	"github.com/emahiro/qrurl/server/lib/line"
+	"github.com/emahiro/qrurl/server/lib/log"
 )
 
 func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +21,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		if err := decorder.Decode(&v); err == io.EOF {
 			break
 		} else if err != nil {
-			slog.ErrorCtx(ctx, "request body parse error", "err", err)
+			log.Errorf(ctx, "decode error. err: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -29,7 +29,7 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 
 	var result string
 	for _, event := range v.Events {
-		slog.InfoCtx(ctx, "event", "event", event)
+		log.Infof(ctx, "event: %v", event)
 		message := event.Message
 		replyToken := event.ReplyToken
 
@@ -37,21 +37,21 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		case linebot.MessageTypeImage:
 			b, err := line.GetMessageContent(ctx, message.Id)
 			if err != nil {
-				slog.ErrorCtx(ctx, "get message content error", "err", err)
+				log.Errorf(ctx, "get message content error. err: %v", err)
 				if err := line.ReplyMessage(ctx, replyToken, lib.ErrUnknown); err != nil {
-					slog.ErrorCtx(ctx, "reply message error", "err", err)
+					log.Errorf(ctx, "reply message error. err: %v", err)
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
 				w.WriteHeader(http.StatusOK)
 				return
 			}
-			slog.InfoCtx(ctx, "get message content", "b", b)
+			log.Infof(ctx, "get message content. %v", b)
 			content, err := lib.DecodeQrCode(ctx, b)
 			if err != nil {
-				slog.ErrorCtx(ctx, "decode qr code error", "err", err)
+				log.Errorf(ctx, "decode qr code error. err: %v", err)
 				if err := line.ReplyMessage(ctx, replyToken, lib.ErrReadQrCode); err != nil {
-					slog.ErrorCtx(ctx, "reply message error", "err", err)
+					log.Errorf(ctx, "reply message error. err: %v", err)
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
@@ -65,13 +65,13 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 
 		// reply message
 		if err := line.ReplyMessage(ctx, replyToken, result); err != nil {
-			slog.ErrorCtx(ctx, "reply message error", "err", err)
+			log.Errorf(ctx, "reply message error. err: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 	}
 
-	slog.InfoCtx(ctx, "result", "result", result)
+	log.Infof(ctx, "result: %v", result)
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(result))

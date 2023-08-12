@@ -193,7 +193,7 @@ func Infof(ctx context.Context, format string, args ...any) {
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FErrorLog"),
 		slog.Time("time", time.Now()),
 	)
-	logger.LogAttrs(ctx, slog.LevelInfo, msg, attrs...)
+	logger.LogAttrs(ctx, slog.LevelInfo, "", attrs...)
 }
 
 func Errorf(ctx context.Context, format string, args ...any) {
@@ -211,6 +211,6 @@ func Errorf(ctx context.Context, format string, args ...any) {
 		slog.String("logName", "projects/"+projectID+"/logs/qrurl-app%2FErrorLog"),
 		slog.Time("time", time.Now()),
 	)
-	logger.LogAttrs(ctx, slog.LevelError, msg, attrs...)
+	logger.LogAttrs(ctx, slog.LevelError, "", attrs...)
 
 }

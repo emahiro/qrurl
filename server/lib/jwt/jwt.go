@@ -33,19 +33,19 @@ func CreateToken(ctx context.Context) (string, error) {
 
 	buf, err := json.MarshalIndent(t, "", "  ")
 	if err != nil {
-		slog.InfoCtx(ctx, "failed to marshal token error", "err", err)
+		slog.InfoContext(ctx, "failed to marshal token error", "err", err)
 		return "", err
 	}
 
 	key, err := jwk.ParseKey([]byte(privKey))
 	if err != nil {
-		slog.InfoCtx(ctx, "failed to parse private key", "err", err)
+		slog.InfoContext(ctx, "failed to parse private key", "err", err)
 		return "", err
 	}
 
 	signed, err := jws.Sign(buf, jws.WithKey(jwa.RS256, key, jws.WithProtectedHeaders(hdrs)))
 	if err != nil {
-		slog.InfoCtx(ctx, "failed to sign token", "err", err)
+		slog.InfoContext(ctx, "failed to sign token", "err", err)
 		return "", err
 	}
 	return string(signed[:]), nil

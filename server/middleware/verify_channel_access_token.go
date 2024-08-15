@@ -1,9 +1,8 @@
 package middleware
 
 import (
+	"log/slog"
 	"net/http"
-
-	"golang.org/x/exp/slog"
 
 	"github.com/emahiro/qrurl/server/lib/line"
 	"github.com/emahiro/qrurl/server/repository"

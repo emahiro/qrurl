@@ -3,6 +3,7 @@ package jwt
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"os"
 	"time"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jws"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"golang.org/x/exp/slog"
 )
 
 func CreateToken(ctx context.Context) (string, error) {

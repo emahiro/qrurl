@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"context"
 	"image"
+	"log/slog"
 
 	"github.com/bufbuild/connect-go"
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
-	"golang.org/x/exp/slog"
 )
 
 func DecodeQrCode(ctx context.Context, b []byte) (string, error) {

@@ -13,7 +13,6 @@ require (
 	github.com/line/line-bot-sdk-go/v7 v7.20.0
 	github.com/makiuchi-d/gozxing v0.1.2-0.20230218072048-d8563176fedd
 	github.com/rs/cors v1.9.0
-	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df
 	golang.org/x/net v0.12.0
 	google.golang.org/api v0.131.0
 	google.golang.org/protobuf v1.31.0

@@ -81,13 +81,19 @@ type QrUrlServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewQrUrlServiceHandler(svc QrUrlServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	mux := http.NewServeMux()
-	mux.Handle(QrUrlServicePostQrCodeProcedure, connect_go.NewUnaryHandler(
+	qrUrlServicePostQrCodeHandler := connect_go.NewUnaryHandler(
 		QrUrlServicePostQrCodeProcedure,
 		svc.PostQrCode,
 		opts...,
-	))
-	return "/qrurl.v1.QrUrlService/", mux
+	)
+	return "/qrurl.v1.QrUrlService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case QrUrlServicePostQrCodeProcedure:
+			qrUrlServicePostQrCodeHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
 }
 
 // UnimplementedQrUrlServiceHandler returns CodeUnimplemented from all methods.

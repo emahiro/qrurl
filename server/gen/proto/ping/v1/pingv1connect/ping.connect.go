@@ -81,13 +81,19 @@ type PingServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewPingServiceHandler(svc PingServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	mux := http.NewServeMux()
-	mux.Handle(PingServicePingProcedure, connect_go.NewUnaryHandler(
+	pingServicePingHandler := connect_go.NewUnaryHandler(
 		PingServicePingProcedure,
 		svc.Ping,
 		opts...,
-	))
-	return "/ping.v1.PingService/", mux
+	)
+	return "/ping.v1.PingService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case PingServicePingProcedure:
+			pingServicePingHandler.ServeHTTP(w, r)
+		default:
+			http.NotFound(w, r)
+		}
+	})
 }
 
 // UnimplementedPingServiceHandler returns CodeUnimplemented from all methods.

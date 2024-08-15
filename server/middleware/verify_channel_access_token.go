@@ -1,9 +1,8 @@
 package middleware
 
 import (
+	"log/slog"
 	"net/http"
-
-	"golang.org/x/exp/slog"
 
 	"github.com/emahiro/qrurl/server/lib/line"
 	"github.com/emahiro/qrurl/server/repository"
@@ -16,25 +15,25 @@ func VerifyChannelAccessToken(next http.Handler) http.Handler {
 		repo := repository.LineChannelAccessTokenRepository{}
 		at, err := repo.GetLatestAccessToken(ctx)
 		if err != nil {
-			slog.ErrorCtx(ctx, "failed to fetch latest access token: %v", "err=", err)
+			slog.ErrorContext(ctx, "failed to fetch latest access token: %v", "err=", err)
 			http.Error(w, "failed to fetch latest access token", http.StatusInternalServerError)
 			return
 		}
 		if at != "" {
 			valid, err := line.CheckIfTokenValid(ctx, at)
 			if err != nil {
-				slog.ErrorCtx(ctx, "failed to check if token is valid: %v", "err=", err)
+				slog.ErrorContext(ctx, "failed to check if token is valid: %v", "err=", err)
 				http.Error(w, "failed to check if token is valid", http.StatusInternalServerError)
 				return
 			}
 			if !valid {
 				at, err := line.PostChannelAccessToken(ctx)
 				if err != nil {
-					slog.ErrorCtx(ctx, "failed to fetch new channel access token: %v", "err=", err)
+					slog.ErrorContext(ctx, "failed to fetch new channel access token: %v", "err=", err)
 					http.Error(w, "failed to fetch new channel access token", http.StatusInternalServerError)
 				}
 				if err := line.NewBotClient(at); err != nil {
-					slog.ErrorCtx(ctx, "failed to fetch new bot client: %v", "err=", err)
+					slog.ErrorContext(ctx, "failed to fetch new bot client: %v", "err=", err)
 					panic(err)
 				}
 			}

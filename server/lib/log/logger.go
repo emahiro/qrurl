@@ -6,13 +6,13 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"sync/atomic"
 	"time"
 
 	"github.com/bufbuild/connect-go"
-	"golang.org/x/exp/slog"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 

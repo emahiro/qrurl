@@ -212,7 +212,9 @@ function App() {
                     </a>
                   </div>
                   <button
-                    onClick={() => { void navigator.clipboard.writeText(url); }}
+                    onClick={() => {
+                      void navigator.clipboard.writeText(url);
+                    }}
                     className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200"
                   >
                     URL をコピー

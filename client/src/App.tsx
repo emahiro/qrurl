@@ -12,23 +12,25 @@ function App() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setIsDarkMode(savedTheme === 'dark' || (!savedTheme && prefersDark));
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    setIsDarkMode(savedTheme === "dark" || (!savedTheme && prefersDark));
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDarkMode);
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    document.documentElement.classList.toggle("dark", isDarkMode);
+    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
   }, [isDarkMode]);
 
-  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files?.length === 0 || files === null) {
       return;
     }
     const file = files[0];
-    
+
     setIsLoading(true);
     setError("");
     setUrl("");
@@ -77,11 +79,23 @@ function App() {
                 aria-label="Toggle theme"
               >
                 {isDarkMode ? (
-                  <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+                  <svg
+                    className="w-5 h-5 text-yellow-500"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                  <svg
+                    className="w-5 h-5 text-gray-700"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
                     <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                   </svg>
                 )}
@@ -100,14 +114,14 @@ function App() {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700">
               <div className="text-center mb-6">
                 <div className="mx-auto w-48 h-48 mb-6 rounded-2xl overflow-hidden shadow-lg">
-                  <img 
-                    src={titleImg} 
-                    alt="QRコードを読み込む男性" 
+                  <img
+                    src={titleImg}
+                    alt="QRコードを読み込む男性"
                     className="w-full h-full object-cover"
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="text-center">
                   <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-2">
@@ -117,7 +131,7 @@ function App() {
                     画像ファイルを選択してください
                   </p>
                 </div>
-                
+
                 <form className="space-y-4">
                   <label className="block">
                     <span className="sr-only">Choose File</span>
@@ -126,7 +140,7 @@ function App() {
                         type="file"
                         className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800 file:transition-colors file:duration-200 cursor-pointer"
                         accept="image/*"
-                        onChange={(e) => handleImage(e)}
+                        onChange={handleImage}
                         disabled={isLoading}
                       />
                       {isLoading && (
@@ -147,60 +161,94 @@ function App() {
               <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
                 読み取り結果
               </h2>
-              
+
               {error && (
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-4">
                   <div className="flex items-center">
-                    <svg className="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    <svg
+                      className="w-5 h-5 text-red-500 mr-2"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
                     </svg>
-                    <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+                    <p className="text-red-800 dark:text-red-200 text-sm">
+                      {error}
+                    </p>
                   </div>
                 </div>
               )}
-              
+
               {url && (
                 <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6">
                   <div className="flex items-center mb-3">
-                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    <svg
+                      className="w-5 h-5 text-green-500 mr-2"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
                     </svg>
-                    <p className="text-green-800 dark:text-green-200 font-medium">URL を読み取りました</p>
+                    <p className="text-green-800 dark:text-green-200 font-medium">
+                      URL を読み取りました
+                    </p>
                   </div>
                   <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-green-200 dark:border-green-800">
-                    <a 
-                      className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 break-all transition-colors duration-200" 
-                      href={url} 
+                    <a
+                      className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 break-all transition-colors duration-200"
+                      href={url}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       {url}
                     </a>
                   </div>
-                  <button 
-                    onClick={() => navigator.clipboard.writeText(url)}
+                  <button
+                    onClick={() => { void navigator.clipboard.writeText(url); }}
                     className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200"
                   >
                     URL をコピー
                   </button>
                 </div>
               )}
-              
+
               {!url && !error && !isLoading && (
                 <div className="text-center py-12">
-                  <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4v1m6 11h2m-6 0h-2v4m-2 0h-2m3-4h2m-6 0h2v4m-2 0h-2m9-4h2m-6 0h-2v4m-2 0h-2" />
+                  <svg
+                    className="w-16 h-16 text-gray-400 mx-auto mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1}
+                      d="M12 4v1m6 11h2m-6 0h-2v4m-2 0h-2m3-4h2m-6 0h2v4m-2 0h-2m9-4h2m-6 0h-2v4m-2 0h-2"
+                    />
                   </svg>
-                  <p className="text-gray-500 dark:text-gray-400">QR コードを選択してください</p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    QR コードを選択してください
+                  </p>
                 </div>
               )}
             </div>
           </div>
         </main>
-        
+
         {/* Footer */}
         <footer className="mt-16 text-center text-gray-600 dark:text-gray-400">
-          <p className="text-sm">© 2024 QR Code Reader. All rights reserved.</p>
+          <p className="text-sm">
+            © 2024 QR Code Reader. All rights reserved.
+          </p>
         </footer>
       </div>
     </div>

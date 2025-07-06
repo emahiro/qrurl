@@ -1,10 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QR Code Reader</title>
+    <title>QR Code Reader - QRコードから簡単URL抽出</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="QRコードから簡単にURLを抽出できるWebアプリケーション。画像をアップロードするだけで、QRコードに含まれるURLを瞬時に読み取ります。" />
+    <meta name="keywords" content="QRコード, URL抽出, QR code reader, 読み取り, 無料, Web, アプリ" />
+    <meta name="author" content="QR Code Reader" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="QR Code Reader - QRコードから簡単URL抽出" />
+    <meta property="og:description" content="QRコードから簡単にURLを抽出できるWebアプリケーション。画像をアップロードするだけで、QRコードに含まれるURLを瞬時に読み取ります。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://qrurl.example.com" />
+    <meta property="og:image" content="https://qrurl.example.com/og-image.png" />
+    <meta property="og:site_name" content="QR Code Reader" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="QR Code Reader - QRコードから簡単URL抽出" />
+    <meta name="twitter:description" content="QRコードから簡単にURLを抽出できるWebアプリケーション。画像をアップロードするだけで、QRコードに含まれるURLを瞬時に読み取ります。" />
+    <meta name="twitter:image" content="https://qrurl.example.com/og-image.png" />
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "QR Code Reader",
+      "description": "QRコードから簡単にURLを抽出できるWebアプリケーション",
+      "url": "https://qrurl.example.com",
+      "applicationCategory": "UtilityApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "JPY"
+      }
+    }
+    </script>
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#2563eb" />
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/src/assets/sp_qr_code_man.png" as="image" />
   </head>
   <body>
     <div id="root"></div>

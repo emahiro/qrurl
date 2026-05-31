@@ -4,6 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/bufbuild/connect-go"
 	"github.com/rs/cors"
@@ -24,9 +28,8 @@ import (
 const addr = ":8080"
 
 func main() {
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	// init logger
 	log.New()
@@ -57,7 +60,7 @@ func main() {
 		http.HandlerFunc(handler.LineWebHookHandler),
 		append(mws, middleware.VerifyChannelAccessToken, middleware.VerifyLine)...,
 	))
-	mux.Handle("/ping", middleware.Chain(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { fmt.Fprintf(w, "{\"message\": \"pong\"}}") }), mws...))
+	mux.Handle("/ping", middleware.Chain(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { fmt.Fprintf(w, "{\"message\": \"pong\"}") }), mws...))
 
 	intercepters := connect.WithInterceptors(
 		intercepter.NewRequestLogIntercepter(),
@@ -71,13 +74,17 @@ func main() {
 	}
 	go func() {
 		<-ctx.Done()
-		if err := server.Close(); err != nil {
+		log.Infof(context.Background(), "shutting down server...")
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := server.Shutdown(shutdownCtx); err != nil {
+			log.Errorf(context.Background(), "failed to shutdown server: %v", err)
 			panic(err)
 		}
 	}()
 
 	log.Infof(ctx, "server start! port: %v", "localhost"+addr)
-	if err := server.ListenAndServe(); err != nil {
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		panic(err)
 	}
 }

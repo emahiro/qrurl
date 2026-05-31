@@ -95,7 +95,6 @@ func PostChannelAccessToken(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", log.WithStackTracef(err, "failed to create jwt token")
 	}
-	log.Infof(context.Background(), "token: %s", token)
 
 	form := url.Values{}
 	form.Set("grant_type", "client_credentials")

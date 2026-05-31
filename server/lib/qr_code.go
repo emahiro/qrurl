@@ -3,10 +3,10 @@ package lib
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"image"
 	"log/slog"
 
-	"github.com/bufbuild/connect-go"
 	"github.com/makiuchi-d/gozxing"
 	"github.com/makiuchi-d/gozxing/qrcode"
 )
@@ -16,20 +16,20 @@ func DecodeQrCode(ctx context.Context, b []byte) (string, error) {
 	img, _, err := image.Decode(buf)
 	if err != nil {
 		slog.ErrorContext(ctx, "image.Decode", "err", err)
-		return "", connect.NewError(connect.CodeInvalidArgument, err)
+		return "", fmt.Errorf("failed to decode image: %w", err)
 	}
 
 	bmp, err := gozxing.NewBinaryBitmapFromImage(img)
 	if err != nil {
 		slog.ErrorContext(ctx, "NewBinaryBitmapFromImage", "err", err)
-		return "", connect.NewError(connect.CodeUnknown, err)
+		return "", fmt.Errorf("failed to create binary bitmap: %w", err)
 	}
 
 	reader := qrcode.NewQRCodeReader()
 	result, err := reader.Decode(bmp, nil)
 	if err != nil {
 		slog.ErrorContext(ctx, "reader.Decode", "err", err)
-		return "", connect.NewError(connect.CodeUnknown, err)
+		return "", fmt.Errorf("failed to decode qr code: %w", err)
 	}
 	return result.GetText(), nil
 }

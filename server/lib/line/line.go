@@ -21,6 +21,10 @@ import (
 // singleton
 var client *linebot.Client
 
+var httpClient = &http.Client{
+	Timeout: 10 * time.Second,
+}
+
 func NewBot(ctx context.Context, useLongTermToken bool) error {
 	var at string
 	if !useLongTermToken {
@@ -73,7 +77,7 @@ func CheckIfTokenValid(ctx context.Context, token string) (bool, error) {
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return false, err
 	}
@@ -109,7 +113,7 @@ func PostChannelAccessToken(ctx context.Context) (string, error) {
 		return "", log.WithStackTracef(err, "failed to create request")
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return "", log.WithStackTracef(err, "failed to request")
 	}

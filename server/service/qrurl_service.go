@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	_ "image/jpeg"
 	_ "image/png"
+	"strings"
 
 	"github.com/bufbuild/connect-go"
 
@@ -21,11 +22,14 @@ func (s *QrUrlService) PostQrCode(
 ) (resp *connect.Response[qrurlv1.PostQrCodeResponse], err error) {
 	b, err := base64.StdEncoding.DecodeString(req.Msg.Image)
 	if err != nil {
-		return nil, log.WithStackTracef(err, "decode error. image: %v", req.Msg.Image)
+		return nil, connect.NewError(connect.CodeInvalidArgument, log.WithStackTracef(err, "failed to decode base64 image"))
 	}
 	url, err := lib.DecodeQrCode(ctx, b)
 	if err != nil {
-		return nil, log.WithStackTracef(err, "decode error. image: %v", req.Msg.Image)
+		if strings.Contains(err.Error(), "failed to decode image") {
+			return nil, connect.NewError(connect.CodeInvalidArgument, log.WithStackTracef(err, "invalid image format"))
+		}
+		return nil, connect.NewError(connect.CodeUnknown, log.WithStackTracef(err, "failed to decode QR code"))
 	}
 	qrurlResp := &qrurlv1.PostQrCodeResponse{
 		Url: url,

@@ -48,7 +48,8 @@ function App() {
           }
           resolve(btoa(binary));
         };
-        reader.onerror = () => reject(new Error("ファイルの読み込みに失敗しました。"));
+        reader.onerror = () =>
+          reject(new Error("ファイルの読み込みに失敗しました。"));
       });
 
       const resp = await postQrCode(base64Data);

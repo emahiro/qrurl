@@ -24,9 +24,9 @@ function App() {
     localStorage.setItem("theme", isDarkMode ? "dark" : "light");
   }, [isDarkMode]);
 
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files?.length === 0 || files === null) {
+    if (!files || files.length === 0) {
       return;
     }
     const file = files[0];
@@ -36,22 +36,31 @@ function App() {
     setUrl("");
 
     try {
-      const reader = new FileReader();
-      reader.readAsBinaryString(file);
-      reader.onload = async (e) => {
-        const binaryStr = e.target?.result;
-        const encoded = btoa(binaryStr as string);
-        const resp = await postQrCode(encoded);
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(file);
+        reader.onload = () => {
+          const arrayBuffer = reader.result as ArrayBuffer;
+          const bytes = new Uint8Array(arrayBuffer);
+          let binary = "";
+          for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+          }
+          resolve(btoa(binary));
+        };
+        reader.onerror = () => reject(new Error("ファイルの読み込みに失敗しました。"));
+      });
 
-        const url = resp.url;
-        const isURL = urlRegex.test(url);
-        if (!isURL) {
-          setError("読み込まれた QR コードは URL ではありません。");
-          return;
-        }
-        setUrl(resp.url);
-      };
+      const resp = await postQrCode(base64Data);
+      const url = resp.url;
+      const isURL = urlRegex.test(url);
+      if (!isURL) {
+        setError("読み込まれた QR コードは URL ではありません。");
+        return;
+      }
+      setUrl(url);
     } catch (err) {
+      console.error(err);
       setError("QR コードの読み込みに失敗しました。");
     } finally {
       setIsLoading(false);
@@ -140,7 +149,9 @@ function App() {
                         type="file"
                         className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900 dark:file:text-blue-300 dark:hover:file:bg-blue-800 file:transition-colors file:duration-200 cursor-pointer"
                         accept="image/*"
-                        onChange={handleImage}
+                        onChange={(e) => {
+                          void handleImage(e);
+                        }}
                         disabled={isLoading}
                       />
                       {isLoading && (

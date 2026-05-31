@@ -14,6 +14,7 @@ import (
 
 	"github.com/emahiro/qrurl/server/lib/jwt"
 	"github.com/emahiro/qrurl/server/lib/log"
+	"github.com/emahiro/qrurl/server/model"
 	"github.com/emahiro/qrurl/server/repository"
 )
 
@@ -132,7 +133,7 @@ func PostChannelAccessToken(ctx context.Context) (string, error) {
 	// Datastore に取得したアクセストークン、KeyID、有効期限、ClientAssertion を保存する。
 	now := time.Now().Unix()
 	lineChannelAccessTokenRepo := repository.LineChannelAccessTokenRepository{}
-	if err := lineChannelAccessTokenRepo.Create(ctx, repository.LineChannelAccessTokenRepository{
+	if err := lineChannelAccessTokenRepo.Create(ctx, model.LineChannelAccessToken{
 		AccessToken:     v.AccessToken,
 		ExpiresIn:       v.ExpiresIn,
 		KeyID:           v.KeyID,

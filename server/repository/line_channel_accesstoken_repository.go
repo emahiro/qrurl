@@ -4,26 +4,19 @@ import (
 	"context"
 
 	"github.com/emahiro/qrurl/server/infra/firestore"
+	"github.com/emahiro/qrurl/server/model"
 )
 
-type LineChannelAccessTokenRepository struct {
-	AccessToken     string `firestore:"access_token,omitempty"`
-	TokenType       string `firestore:"token_type,omitempty"`
-	ExpiresIn       int64  `firestore:"expires_in,omitempty"`
-	KeyID           string `firestore:"key_id,omitempty"`
-	ClientAssertion string `firestore:"client_assertion,omitempty"`
-	CreatedAt       int64  `firestore:"created_at,omitempty"`
-	UpdatedAt       int64  `firestore:"updated_at,omitempty"`
-}
+type LineChannelAccessTokenRepository struct{}
 
 const LineChannelAccessTokenCollection = "LineChannelAccessToken"
 
-func (r LineChannelAccessTokenRepository) Create(ctx context.Context, src LineChannelAccessTokenRepository) error {
+func (r LineChannelAccessTokenRepository) Create(ctx context.Context, src model.LineChannelAccessToken) error {
 	return firestore.Add(ctx, LineChannelAccessTokenCollection, src)
 }
 
 func (r LineChannelAccessTokenRepository) GetLatestAccessToken(ctx context.Context) (string, error) {
-	dst, err := firestore.Query[LineChannelAccessTokenRepository](ctx, LineChannelAccessTokenCollection, firestore.QueryOption{
+	dst, err := firestore.Query[model.LineChannelAccessToken](ctx, LineChannelAccessTokenCollection, firestore.QueryOption{
 		OrderBy: "created_at",
 		Desc:    true,
 		Limit:   1,

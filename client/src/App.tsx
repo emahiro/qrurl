@@ -260,9 +260,7 @@ function App() {
 
         {/* Footer */}
         <footer className="mt-16 text-center text-gray-600 dark:text-gray-400">
-          <p className="text-sm">
-            © 2024 QR Code Reader. All rights reserved.
-          </p>
+          <p className="text-sm">© 2024 QR Code Reader. All rights reserved.</p>
         </footer>
       </div>
     </div>

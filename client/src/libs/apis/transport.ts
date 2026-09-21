@@ -1,4 +1,4 @@
-import { createConnectTransport } from "@bufbuild/connect-web";
+import { createConnectTransport } from "@connectrpc/connect-web";
 
 // init gRPC Client
 export const transport = createConnectTransport({

@@ -1,10 +1,10 @@
+import { createClient } from "@connectrpc/connect";
+import { QrUrlService } from "../../../gen/proto/qrurl/v1/qrurl_pb";
 import { transport } from "./transport";
-import { createPromiseClient } from "@bufbuild/connect";
-import { QrUrlService } from "../../../gen/proto/qrurl/v1/qrurl_connectweb";
 
-const client = createPromiseClient(QrUrlService, transport);
+const client = createClient(QrUrlService, transport);
 
 export const postQrCode = async (image: string) => {
-  const resp = await client.postQrCode({ image: image }, {});
+  const resp = await client.postQrCode({ image });
   return resp;
 };

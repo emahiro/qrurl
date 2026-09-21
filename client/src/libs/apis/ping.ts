@@ -1,10 +1,10 @@
+import { createClient } from "@connectrpc/connect";
+import { PingService } from "../../../gen/proto/ping/v1/ping_pb";
 import { transport } from "./transport";
-import { createPromiseClient } from "@bufbuild/connect";
-import { PingService } from "../../../gen/proto/ping/v1/ping_connectweb";
 
-const client = createPromiseClient(PingService, transport);
+const client = createClient(PingService, transport);
 
 export const Ping = async () => {
-  const resp = await client.ping({ message: "Hello" }, {});
+  const resp = await client.ping({});
   return resp;
 };

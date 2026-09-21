@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/lestrrat-go/jwx/v2/jwa"
-	"github.com/lestrrat-go/jwx/v2/jwk"
-	"github.com/lestrrat-go/jwx/v2/jws"
-	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/lestrrat-go/jwx/v3/jwa"
+	"github.com/lestrrat-go/jwx/v3/jwk"
+	"github.com/lestrrat-go/jwx/v3/jws"
+	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
 func CreateToken(ctx context.Context) (string, error) {
@@ -43,7 +43,7 @@ func CreateToken(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	signed, err := jws.Sign(buf, jws.WithKey(jwa.RS256, key, jws.WithProtectedHeaders(hdrs)))
+	signed, err := jws.Sign(buf, jws.WithKey(jwa.RS256(), key, jws.WithProtectedHeaders(hdrs)))
 	if err != nil {
 		slog.InfoContext(ctx, "failed to sign token", "err", err)
 		return "", err

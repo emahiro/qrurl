@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/line/line-bot-sdk-go/v7/linebot"
+	"github.com/line/line-bot-sdk-go/v8/linebot/messaging_api"
 
 	"github.com/emahiro/qrurl/server/lib/jwt"
 	"github.com/emahiro/qrurl/server/lib/log"
@@ -18,8 +18,13 @@ import (
 	"github.com/emahiro/qrurl/server/repository"
 )
 
+const MessageTypeImage = "image"
+
 // singleton
-var client *linebot.Client
+var (
+	botClient  *messaging_api.MessagingApiAPI
+	blobClient *messaging_api.MessagingApiBlobAPI
+)
 
 var httpClient = &http.Client{
 	Timeout: 10 * time.Second,
@@ -56,13 +61,18 @@ func NewBot(ctx context.Context, useLongTermToken bool) error {
 }
 
 func NewBotClient(at string) error {
-	bot, err := linebot.New(os.Getenv("LINE_MESSAGE_CHANNEL_SECRET"), at)
+	bot, err := messaging_api.NewMessagingApiAPI(at)
+	if err != nil {
+		return err
+	}
+	blob, err := messaging_api.NewMessagingApiBlobAPI(at)
 	if err != nil {
 		return err
 	}
 
 	// set bot to singleton
-	client = bot
+	botClient = bot
+	blobClient = blob
 	return nil
 }
 
@@ -191,13 +201,13 @@ type PostChannelAccessTokenResponse struct {
 }
 
 func GetMessageContent(_ context.Context, messageID string) ([]byte, error) {
-	resp, err := client.GetMessageContent(messageID).Do()
+	resp, err := blobClient.GetMessageContent(messageID)
 	if err != nil {
 		return nil, log.WithStackTracef(err, "failed to get message content. messageID: %s", messageID)
 	}
-	defer resp.Content.Close()
+	defer resp.Body.Close()
 
-	b, err := io.ReadAll(resp.Content)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, log.WithStackTracef(err, "failed to read message content. messageID: %s", messageID)
 	}
@@ -205,10 +215,15 @@ func GetMessageContent(_ context.Context, messageID string) ([]byte, error) {
 }
 
 func ReplyMessage(_ context.Context, replyToken string, text string) error {
-	messages := []linebot.SendingMessage{
-		linebot.NewTextMessage(text),
+	req := &messaging_api.ReplyMessageRequest{
+		ReplyToken: replyToken,
+		Messages: []messaging_api.MessageInterface{
+			&messaging_api.TextMessage{
+				Text: text,
+			},
+		},
 	}
-	if _, err := client.ReplyMessage(replyToken, messages...).Do(); err != nil {
+	if _, err := botClient.ReplyMessage(req); err != nil {
 		return log.WithStackTracef(err, "failed to reply message. replyToken: %s", replyToken)
 	}
 	return nil

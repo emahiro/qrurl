@@ -7,7 +7,7 @@ import (
 	_ "image/png"
 	"strings"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 
 	qrurlv1 "github.com/emahiro/qrurl/server/gen/proto/qrurl/v1"
 	"github.com/emahiro/qrurl/server/lib"

@@ -5,9 +5,9 @@
 package pingv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	v1 "github.com/emahiro/qrurl/server/gen/proto/ping/v1"
 	http "net/http"
 	strings "strings"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// PingServiceName is the fully-qualified name of the PingService service.
@@ -39,7 +39,7 @@ const (
 
 // PingServiceClient is a client for the ping.v1.PingService service.
 type PingServiceClient interface {
-	Ping(context.Context, *connect_go.Request[v1.PingRequest]) (*connect_go.Response[v1.PingResponse], error)
+	Ping(context.Context, *connect.Request[v1.PingRequest]) (*connect.Response[v1.PingResponse], error)
 }
 
 // NewPingServiceClient constructs a client for the ping.v1.PingService service. By default, it uses
@@ -49,30 +49,32 @@ type PingServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewPingServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) PingServiceClient {
+func NewPingServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) PingServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	pingServiceMethods := v1.File_proto_ping_v1_ping_proto.Services().ByName("PingService").Methods()
 	return &pingServiceClient{
-		ping: connect_go.NewClient[v1.PingRequest, v1.PingResponse](
+		ping: connect.NewClient[v1.PingRequest, v1.PingResponse](
 			httpClient,
 			baseURL+PingServicePingProcedure,
-			opts...,
+			connect.WithSchema(pingServiceMethods.ByName("Ping")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // pingServiceClient implements PingServiceClient.
 type pingServiceClient struct {
-	ping *connect_go.Client[v1.PingRequest, v1.PingResponse]
+	ping *connect.Client[v1.PingRequest, v1.PingResponse]
 }
 
 // Ping calls ping.v1.PingService.Ping.
-func (c *pingServiceClient) Ping(ctx context.Context, req *connect_go.Request[v1.PingRequest]) (*connect_go.Response[v1.PingResponse], error) {
+func (c *pingServiceClient) Ping(ctx context.Context, req *connect.Request[v1.PingRequest]) (*connect.Response[v1.PingResponse], error) {
 	return c.ping.CallUnary(ctx, req)
 }
 
 // PingServiceHandler is an implementation of the ping.v1.PingService service.
 type PingServiceHandler interface {
-	Ping(context.Context, *connect_go.Request[v1.PingRequest]) (*connect_go.Response[v1.PingResponse], error)
+	Ping(context.Context, *connect.Request[v1.PingRequest]) (*connect.Response[v1.PingResponse], error)
 }
 
 // NewPingServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -80,11 +82,13 @@ type PingServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewPingServiceHandler(svc PingServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	pingServicePingHandler := connect_go.NewUnaryHandler(
+func NewPingServiceHandler(svc PingServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	pingServiceMethods := v1.File_proto_ping_v1_ping_proto.Services().ByName("PingService").Methods()
+	pingServicePingHandler := connect.NewUnaryHandler(
 		PingServicePingProcedure,
 		svc.Ping,
-		opts...,
+		connect.WithSchema(pingServiceMethods.ByName("Ping")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/ping.v1.PingService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -99,6 +103,6 @@ func NewPingServiceHandler(svc PingServiceHandler, opts ...connect_go.HandlerOpt
 // UnimplementedPingServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedPingServiceHandler struct{}
 
-func (UnimplementedPingServiceHandler) Ping(context.Context, *connect_go.Request[v1.PingRequest]) (*connect_go.Response[v1.PingResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("ping.v1.PingService.Ping is not implemented"))
+func (UnimplementedPingServiceHandler) Ping(context.Context, *connect.Request[v1.PingRequest]) (*connect.Response[v1.PingResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("ping.v1.PingService.Ping is not implemented"))
 }

@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"github.com/bufbuild/connect-go"
+	"connectrpc.com/connect"
 
 	pingv1 "github.com/emahiro/qrurl/server/gen/proto/ping/v1"
 )

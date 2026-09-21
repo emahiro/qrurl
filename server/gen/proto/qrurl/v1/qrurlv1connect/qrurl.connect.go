@@ -5,9 +5,9 @@
 package qrurlv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	v1 "github.com/emahiro/qrurl/server/gen/proto/qrurl/v1"
 	http "net/http"
 	strings "strings"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// QrUrlServiceName is the fully-qualified name of the QrUrlService service.
@@ -39,7 +39,7 @@ const (
 
 // QrUrlServiceClient is a client for the qrurl.v1.QrUrlService service.
 type QrUrlServiceClient interface {
-	PostQrCode(context.Context, *connect_go.Request[v1.PostQrCodeRequest]) (*connect_go.Response[v1.PostQrCodeResponse], error)
+	PostQrCode(context.Context, *connect.Request[v1.PostQrCodeRequest]) (*connect.Response[v1.PostQrCodeResponse], error)
 }
 
 // NewQrUrlServiceClient constructs a client for the qrurl.v1.QrUrlService service. By default, it
@@ -49,30 +49,32 @@ type QrUrlServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewQrUrlServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) QrUrlServiceClient {
+func NewQrUrlServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) QrUrlServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	qrUrlServiceMethods := v1.File_proto_qrurl_v1_qrurl_proto.Services().ByName("QrUrlService").Methods()
 	return &qrUrlServiceClient{
-		postQrCode: connect_go.NewClient[v1.PostQrCodeRequest, v1.PostQrCodeResponse](
+		postQrCode: connect.NewClient[v1.PostQrCodeRequest, v1.PostQrCodeResponse](
 			httpClient,
 			baseURL+QrUrlServicePostQrCodeProcedure,
-			opts...,
+			connect.WithSchema(qrUrlServiceMethods.ByName("PostQrCode")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // qrUrlServiceClient implements QrUrlServiceClient.
 type qrUrlServiceClient struct {
-	postQrCode *connect_go.Client[v1.PostQrCodeRequest, v1.PostQrCodeResponse]
+	postQrCode *connect.Client[v1.PostQrCodeRequest, v1.PostQrCodeResponse]
 }
 
 // PostQrCode calls qrurl.v1.QrUrlService.PostQrCode.
-func (c *qrUrlServiceClient) PostQrCode(ctx context.Context, req *connect_go.Request[v1.PostQrCodeRequest]) (*connect_go.Response[v1.PostQrCodeResponse], error) {
+func (c *qrUrlServiceClient) PostQrCode(ctx context.Context, req *connect.Request[v1.PostQrCodeRequest]) (*connect.Response[v1.PostQrCodeResponse], error) {
 	return c.postQrCode.CallUnary(ctx, req)
 }
 
 // QrUrlServiceHandler is an implementation of the qrurl.v1.QrUrlService service.
 type QrUrlServiceHandler interface {
-	PostQrCode(context.Context, *connect_go.Request[v1.PostQrCodeRequest]) (*connect_go.Response[v1.PostQrCodeResponse], error)
+	PostQrCode(context.Context, *connect.Request[v1.PostQrCodeRequest]) (*connect.Response[v1.PostQrCodeResponse], error)
 }
 
 // NewQrUrlServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -80,11 +82,13 @@ type QrUrlServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewQrUrlServiceHandler(svc QrUrlServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	qrUrlServicePostQrCodeHandler := connect_go.NewUnaryHandler(
+func NewQrUrlServiceHandler(svc QrUrlServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	qrUrlServiceMethods := v1.File_proto_qrurl_v1_qrurl_proto.Services().ByName("QrUrlService").Methods()
+	qrUrlServicePostQrCodeHandler := connect.NewUnaryHandler(
 		QrUrlServicePostQrCodeProcedure,
 		svc.PostQrCode,
-		opts...,
+		connect.WithSchema(qrUrlServiceMethods.ByName("PostQrCode")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/qrurl.v1.QrUrlService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -99,6 +103,6 @@ func NewQrUrlServiceHandler(svc QrUrlServiceHandler, opts ...connect_go.HandlerO
 // UnimplementedQrUrlServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedQrUrlServiceHandler struct{}
 
-func (UnimplementedQrUrlServiceHandler) PostQrCode(context.Context, *connect_go.Request[v1.PostQrCodeRequest]) (*connect_go.Response[v1.PostQrCodeResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("qrurl.v1.QrUrlService.PostQrCode is not implemented"))
+func (UnimplementedQrUrlServiceHandler) PostQrCode(context.Context, *connect.Request[v1.PostQrCodeRequest]) (*connect.Response[v1.PostQrCodeResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("qrurl.v1.QrUrlService.PostQrCode is not implemented"))
 }

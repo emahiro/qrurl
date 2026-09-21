@@ -4,8 +4,8 @@ go 1.27
 
 require (
 	cloud.google.com/go/firestore v1.25.0
+	connectrpc.com/connect v1.21.0
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/bufbuild/connect-go v1.10.0
 	github.com/cockroachdb/errors v1.14.0
 	github.com/lestrrat-go/jwx/v3 v3.3.0
 	github.com/line/line-bot-sdk-go/v8 v8.22.0

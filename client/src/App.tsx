@@ -7,17 +7,15 @@ const urlRegex = /https?/;
 
 function App() {
   const [url, setUrl] = useState("");
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
+  const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
     const prefersDark = window.matchMedia(
       "(prefers-color-scheme: dark)",
     ).matches;
-    setIsDarkMode(savedTheme === "dark" || (!savedTheme && prefersDark));
-  }, []);
+    return savedTheme === "dark" || (!savedTheme && prefersDark);
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDarkMode);

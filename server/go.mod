@@ -8,7 +8,7 @@ require (
 	github.com/bufbuild/connect-go v1.10.0
 	github.com/cockroachdb/errors v1.14.0
 	github.com/lestrrat-go/jwx/v3 v3.3.0
-	github.com/line/line-bot-sdk-go/v7 v7.21.0
+	github.com/line/line-bot-sdk-go/v8 v8.22.0
 	github.com/makiuchi-d/gozxing v0.1.2-0.20230218072048-d8563176fedd
 	github.com/rs/cors v1.11.1
 	golang.org/x/net v0.59.0

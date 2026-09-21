@@ -5,8 +5,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/line/line-bot-sdk-go/v7/linebot"
-
 	"github.com/emahiro/qrurl/server/lib"
 	"github.com/emahiro/qrurl/server/lib/line"
 	"github.com/emahiro/qrurl/server/lib/log"
@@ -33,8 +31,8 @@ func LineWebHookHandler(w http.ResponseWriter, r *http.Request) {
 		message := event.Message
 		replyToken := event.ReplyToken
 
-		switch linebot.MessageType(message.Type) {
-		case linebot.MessageTypeImage:
+		switch message.Type {
+		case line.MessageTypeImage:
 			b, err := line.GetMessageContent(ctx, message.Id)
 			if err != nil {
 				log.Errorf(ctx, "get message content error. err: %v", err)

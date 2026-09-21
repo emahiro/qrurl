@@ -110,8 +110,8 @@ github.com/lestrrat-go/jwx/v3 v3.3.0 h1:OXcYvQOQ7cxWzeZ/Q9sYk8ABe/kCSI371WmuACiC
 github.com/lestrrat-go/jwx/v3 v3.3.0/go.mod h1:eIJhDcKHBwcgxqv8RiIylV67TVl1wJp/265IAHY1Db8=
 github.com/lestrrat-go/option/v2 v2.0.0 h1:XxrcaJESE1fokHy3FpaQ/cXW8ZsIdWcdFzzLOcID3Ss=
 github.com/lestrrat-go/option/v2 v2.0.0/go.mod h1:oSySsmzMoR0iRzCDCaUfsCzxQHUEuhOViQObyy7S6Vg=
-github.com/line/line-bot-sdk-go/v7 v7.21.0 h1:eeYMuAwaDV5DZNTRqDipNhzjT51HwEcM1PRPG+cqh4Y=
-github.com/line/line-bot-sdk-go/v7 v7.21.0/go.mod h1:idpoxOZgtSd8JyhctMMpwg5LNgRAIL/QIxa5S0DXcMg=
+github.com/line/line-bot-sdk-go/v8 v8.22.0 h1:jkxX5Ds8zlPSxUYil63P/Xg52SJ+kN/Xa7A4t/ItlDw=
+github.com/line/line-bot-sdk-go/v8 v8.22.0/go.mod h1:QMXJwPka2ysSeVQKWXkBp8DzBFs+CFAXFNo75KJtWho=
 github.com/makiuchi-d/gozxing v0.1.2-0.20230218072048-d8563176fedd h1:SCT/G62vUDPEf1D8Wr2KY4fUZxMAJqe8wtCJIyhWGbw=
 github.com/makiuchi-d/gozxing v0.1.2-0.20230218072048-d8563176fedd/go.mod h1:eRIHbOjX7QWxLIDJoQuMLhuXg9LAuw6znsUtRkNw9DU=
 github.com/pingcap/errors v0.11.4 h1:lFuQV/oaUMGcD2tqt+01ROSmJs75VG1ToEOkZIZ4nE4=

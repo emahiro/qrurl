@@ -36,12 +36,7 @@ jobs:
         run: npm run lint
 
       - name: Format check
-        run: |
-          npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css,md}"
-          if [ $? -ne 0 ]; then
-            echo "❌ Code formatting issues found. Please run 'npx prettier --write .' to fix them."
-            exit 1
-          fi
+        run: npm run format:check
 
       - name: Type check
         run: npx tsc --noEmit

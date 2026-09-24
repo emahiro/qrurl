@@ -1,0 +1,17 @@
+{
+  "monorepo-auto-linter": {
+    "enabled": true,
+    "PostToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ./scripts/lint-hook.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

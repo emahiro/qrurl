@@ -26,6 +26,7 @@
 - **スクリプト入力**: JSON payload (`.toolCall.args.TargetFile`)
 - **処理分岐**:
   - **Go (`server/` または `*.go`)**:
+    - `go fix ./...` でモダン記法の自動適用（Go 1.24+ registered analyzers による modernize）
     - `gofmt -w <file>` で標準整形
     - `goimports -w -local github.com/emahiro/qrurl/server <file>`（利用可能な場合）
     - `cd server && go vet ./...` で型・静的解析チェック

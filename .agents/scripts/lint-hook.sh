@@ -33,7 +33,10 @@ fi
 if [ -n "$TARGET_FILE" ] && [ -f "$TARGET_FILE" ]; then
   case "$TARGET_FILE" in
     *.go)
-      # Server (Go) verification
+      # Server (Go) verification & modernize
+      if [ -d "$REPO_ROOT/server" ] && command -v go >/dev/null 2>&1; then
+        (cd "$REPO_ROOT/server" && go fix ./... >/dev/null 2>&1) || true
+      fi
       if command -v gofmt >/dev/null 2>&1; then
         gofmt -w "$TARGET_FILE" >/dev/null 2>&1 || true
       fi

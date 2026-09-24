@@ -14,7 +14,7 @@ Go 製バックエンドサーバー（Cloud Run）と React / TypeScript 製フ
 | **Frontend (`client/`)** | React 19, TypeScript 7, Vite 8, Tailwind CSS 4, Connect-Web | Firebase Hosting / 静的配信 |
 | **API / Protocol (`proto/`)** | Protocol Buffers v3, Buf | Connect RPC 経由での通信 |
 | **Database** | Google Cloud Firestore | トークン管理・セッション情報等の永続化 |
-| **Lint & Format** | Server: `gofmt`, `goimports`, `go vet`<br>Client: Biome 2.5 (インデント: スペース2, クォート: ダブル) | Lifecycle Hooks (`.agents/hooks.json`) により自動実行 |
+| **Lint & Format** | Server: `go fix` (modernize), `gofmt`, `goimports`, `go vet`<br>Client: Biome 2.5 (インデント: スペース2, クォート: ダブル) | Lifecycle Hooks (`.agents/hooks.json`) により自動実行 |
 | **CI / CD** | GitHub Actions (`go.yml`, `nextjs.yml`, `deploy.yml`, `deploy-client.yml`) | Go vet/test, Biome, tsc, Vite build |
 
 ### ディレクトリ構成
@@ -79,6 +79,7 @@ Go 製バックエンドサーバー（Cloud Run）と React / TypeScript 製フ
 ```bash
 cd server
 go run main.go               # サーバー起動 (要環境変数)
+go fix ./...                 # コード修正 & modernize (Go 1.24+ registered analyzers)
 go vet ./...                 # 静的解析
 go test ./...                # 単体テスト実行
 go build -o qrurl main.go    # バイナリビルド
@@ -111,6 +112,7 @@ buf generate                 # Go / TypeScript コードの再生成
 完了報告前に以下の全項目がエラーゼロであることを確認すること:
 
 1. **Server (Go)**:
+   - `cd server && go fix ./...` (モダン記法の自動適用・エラーゼロ)
    - `cd server && go vet ./...` (静的解析エラーゼロ)
    - `cd server && go test ./...` (全テスト PASS)
 2. **Client (React / TypeScript)**:
@@ -130,4 +132,4 @@ buf generate                 # Go / TypeScript コードの再生成
 - **計画書・設計ログの記録**:
   - 中〜大規模な変更やアーキテクチャ見直しの際は、`memory/plans/plan-YYYYMMDD-{slug}.md` に計画書を作成・追跡する。
 - **Lifecycle Hooks**:
-  - `.agents/hooks.json` により、ファイル編集（`write_to_file`, `replace_file_content`）後に `.agents/scripts/lint-hook.sh` が自動起動し、Go および Client の自動フォーマット・検証を実行する。
+  - `.agents/hooks.json` により、ファイル編集（`write_to_file`, `replace_file_content`）後に `.agents/scripts/lint-hook.sh` が自動起動し、Go（`go fix`, `gofmt`, `goimports`, `go vet`）および Client（`biome check --write`）の自動フォーマット・検証を実行する。

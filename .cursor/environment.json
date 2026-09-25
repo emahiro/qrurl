@@ -1,0 +1,18 @@
+{
+  "name": "qrurl",
+  "install": "bash .cursor/install.sh",
+  "terminals": [
+    {
+      "name": "firestore-emulator",
+      "command": "export CLOUDSDK_CORE_DISABLE_PROMPTS=1 && exec \"$HOME/google-cloud-sdk/bin/gcloud\" emulators firestore start --host-port=127.0.0.1:8090"
+    },
+    {
+      "name": "go-server",
+      "command": "export PATH=\"/usr/local/go/bin:$PATH\" && for i in $(seq 1 30); do curl -sf http://127.0.0.1:8090 >/dev/null 2>&1 && break; sleep 1; done && cd server && export LINE_CHANNEL_ACCESS_TOKEN=\"${LINE_CHANNEL_ACCESS_TOKEN:-dev-placeholder-token}\" GCP_PROJECT_ID=\"${GCP_PROJECT_ID:-qrurl-local}\" FIRESTORE_EMULATOR_HOST=\"127.0.0.1:8090\" && exec go run main.go"
+    },
+    {
+      "name": "vite-dev",
+      "command": "cd client && exec npm run dev"
+    }
+  ]
+}

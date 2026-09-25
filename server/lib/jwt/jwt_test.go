@@ -3,7 +3,13 @@ package jwt
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
+	"time"
+
+	"github.com/lestrrat-go/jwx/v3/jwa"
+	"github.com/lestrrat-go/jwx/v3/jwk"
+	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
 const (
@@ -33,11 +39,12 @@ const (
 		"q": "1FHqtDX4EBIecuxOWm8UO2fYR3-12reQw8UAG2NgahB6vyLoO8WXu8SHUyM1EPIIE8OKUh-T9gbaKpXuCYWvqwK6A_HiUaiXJTYfSzNMfRF8sJyL8jHFtwSI8eKb6iUtBVwdfwaskMdfxtQuGPJIngNmnhbdCLJ2vR7fZmxcuYE",
 		"qi": "-RFyvtfeTIsR8Xfa1AMmG2z080l8Vn8nVzzuqatkt6ewPNLryBlD0iWeGX-kHxMApSu2N8v-dmKKg9lDSpKvxV9jinVMvCTqRkCt73QC6rnO54LPU1LNlA-dTciPTKwtRbTvdfvfJau0T9zRHl6d0qa3F0XT5yRLqf2ngTeERDc"
 	}`
+	testChannelID = "lineChannelId"
 )
 
 func TestMain(m *testing.M) {
 	os.Setenv("LINE_PUBLIC_KEY_ID", testPubKey)
-	os.Setenv("LINE_CHANNEL_ID", "lineChannelId")
+	os.Setenv("LINE_CHANNEL_ID", testChannelID)
 	os.Setenv("LINE_PRIVATE_KEY", testPrivateKey)
 	m.Run()
 	os.Setenv("LINE_PUBLIC_KEY_ID", "")
@@ -46,12 +53,97 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateToken(t *testing.T) {
-	token, err := CreateToken(context.Background())
+	verifyKey, err := jwk.ParseKey([]byte(testPubKey))
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("parse test public key: %v", err)
 	}
-	if err != nil {
-		t.Fatal("token is empty")
+
+	tests := []struct {
+		name    string
+		setup   func(t *testing.T)
+		wantErr bool
+	}{
+		{
+			name:    "signed JWT carries LINE client-assertion claims",
+			setup:   func(t *testing.T) {},
+			wantErr: false,
+		},
+		{
+			name: "missing private key",
+			setup: func(t *testing.T) {
+				t.Setenv("LINE_PRIVATE_KEY", "")
+			},
+			wantErr: true,
+		},
+		{
+			name: "invalid private key",
+			setup: func(t *testing.T) {
+				t.Setenv("LINE_PRIVATE_KEY", "{not-a-jwk}")
+			},
+			wantErr: true,
+		},
 	}
-	t.Log("token: ", token)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.setup(t)
+
+			token, err := CreateToken(context.Background())
+			if tt.wantErr {
+				if err == nil {
+					t.Fatal("expected error")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("CreateToken: %v", err)
+			}
+			if token == "" {
+				t.Fatal("token is empty")
+			}
+
+			parts := strings.Split(token, ".")
+			if len(parts) != 3 {
+				t.Fatalf("expected compact JWT with 3 segments, got %d", len(parts))
+			}
+
+			parsed, err := jwt.Parse(
+				[]byte(token),
+				jwt.WithKey(jwa.RS256(), verifyKey),
+			)
+			if err != nil {
+				t.Fatalf("verify JWT: %v", err)
+			}
+
+			iss, ok := parsed.Issuer()
+			if !ok || iss != testChannelID {
+				t.Fatalf("issuer: got %q want %q", iss, testChannelID)
+			}
+			sub, ok := parsed.Subject()
+			if !ok || sub != testChannelID {
+				t.Fatalf("subject: got %q want %q", sub, testChannelID)
+			}
+			aud, ok := parsed.Audience()
+			if !ok || len(aud) != 1 || aud[0] != "https://api.line.me/" {
+				t.Fatalf("audience: got %v", aud)
+			}
+
+			exp, ok := parsed.Expiration()
+			if !ok {
+				t.Fatal("missing exp claim")
+			}
+			now := time.Now()
+			if exp.Before(now) || exp.After(now.Add(31*time.Minute)) {
+				t.Fatalf("exp out of expected ~30m window: %v", exp)
+			}
+
+			var tokenExp float64
+			if err := parsed.Get("token_exp", &tokenExp); err != nil {
+				t.Fatalf("token_exp claim: %v", err)
+			}
+			if tokenExp != float64(60*60*24*30) {
+				t.Fatalf("token_exp: got %v want %d", tokenExp, 60*60*24*30)
+			}
+		})
+	}
 }

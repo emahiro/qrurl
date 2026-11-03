@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "run_id": "2026-11-03T13:26:21Z",
+  "run_id": "2026-11-03T13:58:16Z",
   "host": "Linux",
-  "repo": "/workspace",
+  "repo": "/agent/repos/qrurl",
   "summary": {
-    "static_pass": 11,
-    "static_fail": 1,
+    "static_pass": 12,
+    "static_fail": 0,
     "command_pass": 8,
     "command_fail": 0
   },
@@ -62,8 +62,8 @@
     },
     {
       "id": "hook:lint-path",
-      "status": "fail",
-      "detail": "hooks.json uses ./scripts/lint-hook.sh but script is at .agents/scripts/lint-hook.sh"
+      "status": "pass",
+      "detail": "hook points to .agents/scripts/lint-hook.sh"
     },
     {
       "id": "secrets:harness",
@@ -74,58 +74,58 @@
   "command_checks": [
     {
       "name": "go-fix",
-      "command": "bash -lc cd \"/workspace/server\" && go fix ./...",
+      "command": "bash -lc cd \"/agent/repos/qrurl/server\" && go fix ./...",
       "exit_code": 0,
-      "elapsed_ms": 331,
+      "elapsed_ms": 346,
       "output_tail": ""
     },
     {
       "name": "go-vet",
-      "command": "bash -lc cd \"/workspace/server\" && go vet ./...",
+      "command": "bash -lc cd \"/agent/repos/qrurl/server\" && go vet ./...",
       "exit_code": 0,
-      "elapsed_ms": 317,
+      "elapsed_ms": 354,
       "output_tail": ""
     },
     {
       "name": "go-test",
-      "command": "bash -lc cd \"/workspace/server\" && go test ./...",
+      "command": "bash -lc cd \"/agent/repos/qrurl/server\" && go test ./...",
       "exit_code": 0,
-      "elapsed_ms": 320,
+      "elapsed_ms": 330,
       "output_tail": "?   \tgithub.com/emahiro/qrurl/server\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/gen/proto/ping/v1\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/gen/proto/ping/v1/pingv1connect\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/gen/proto/qrurl/v1\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/gen/proto/qrurl/v1/qrurlv1connect\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/handler\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/infra/firestore\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/intercepter\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/lib\t[no test files] ok  \tgithub.com/emahiro/qrurl/server/lib/jwt\t(cached) ?   \tgithub.com/emahiro/qrurl/server/lib/line\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/lib/log\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/middleware\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/model\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/repository\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/service\t[no test files]"
     },
     {
       "name": "go-build",
-      "command": "bash -lc cd \"/workspace/server\" && go build -o /tmp/qrurl-harness main.go",
+      "command": "bash -lc cd \"/agent/repos/qrurl/server\" && go build -o /tmp/qrurl-harness main.go",
       "exit_code": 0,
-      "elapsed_ms": 276,
+      "elapsed_ms": 285,
       "output_tail": ""
     },
     {
       "name": "client-lint",
-      "command": "bash -lc cd \"/workspace/client\" && npm run lint",
+      "command": "bash -lc cd \"/agent/repos/qrurl/client\" && npm run lint",
       "exit_code": 0,
-      "elapsed_ms": 263,
-      "output_tail": " > client@0.0.0 lint > biome lint src  Checked 9 files in 6ms. No fixes applied."
+      "elapsed_ms": 264,
+      "output_tail": " > client@0.0.0 lint > biome lint src  Checked 9 files in 5ms. No fixes applied."
     },
     {
       "name": "client-tsc",
-      "command": "bash -lc cd \"/workspace/client\" && npx tsc --noEmit",
+      "command": "bash -lc cd \"/agent/repos/qrurl/client\" && npx tsc --noEmit",
       "exit_code": 0,
-      "elapsed_ms": 437,
+      "elapsed_ms": 443,
       "output_tail": ""
     },
     {
       "name": "client-build",
-      "command": "bash -lc cd \"/workspace/client\" && npm run build",
+      "command": "bash -lc cd \"/agent/repos/qrurl/client\" && npm run build",
       "exit_code": 0,
-      "elapsed_ms": 720,
-      "output_tail": " > client@0.0.0 build > tsc && vite build  vite v8.3.5 building client environment for production... transforming... ✓ 157 modules transformed. rendering chunks... computing gzip size... dist/index.html                            2.80 kB │ gzip:   0.99 kB dist/assets/sp_qr_code_man-CyMfPHAy.png  134.55 kB dist/assets/index-xEFMjQiZ.css            21.82 kB │ gzip:   4.96 kB dist/assets/index-SXSkdrhV.js            343.65 kB │ gzip: 102.93 kB  ✓ built in 205ms"
+      "elapsed_ms": 740,
+      "output_tail": " > client@0.0.0 build > tsc && vite build  vite v8.3.0 building client environment for production... transforming... ✓ 157 modules transformed. rendering chunks... computing gzip size... dist/index.html                            2.80 kB │ gzip:   0.99 kB dist/assets/sp_qr_code_man-CyMfPHAy.png  134.55 kB dist/assets/index-DdHs8dhc.css            21.82 kB │ gzip:   4.96 kB dist/assets/index-DlsyEnI6.js            343.76 kB │ gzip: 102.92 kB  ✓ built in 205ms"
     },
     {
       "name": "buf-lint",
-      "command": "bash -lc cd \"/workspace\" && \"/workspace/client/node_modules/.bin/buf\" lint",
+      "command": "bash -lc cd \"/agent/repos/qrurl\" && \"/agent/repos/qrurl/client/node_modules/.bin/buf\" lint",
       "exit_code": 0,
-      "elapsed_ms": 263,
+      "elapsed_ms": 260,
       "output_tail": ""
     }
   ]

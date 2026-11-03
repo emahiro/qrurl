@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ./scripts/lint-hook.sh",
+            "command": "bash .agents/scripts/lint-hook.sh",
             "timeout": 30
           }
         ]

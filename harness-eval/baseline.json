@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "run_id": "2026-11-03T13:26:21Z",
+  "host": "Linux",
+  "repo": "/workspace",
+  "summary": {
+    "static_pass": 11,
+    "static_fail": 1,
+    "command_pass": 8,
+    "command_fail": 0
+  },
+  "static_checks": [
+    {
+      "id": "doc:AGENTS.md",
+      "status": "pass",
+      "detail": "AGENTS.md"
+    },
+    {
+      "id": "agents-path:proto/",
+      "status": "pass",
+      "detail": "proto/"
+    },
+    {
+      "id": "agents-path:server/",
+      "status": "pass",
+      "detail": "server/"
+    },
+    {
+      "id": "agents-path:client/",
+      "status": "pass",
+      "detail": "client/"
+    },
+    {
+      "id": "agents-path:.agents/hooks.json",
+      "status": "pass",
+      "detail": ".agents/hooks.json"
+    },
+    {
+      "id": "agents-path:.agents/scripts/lint-hook.sh",
+      "status": "pass",
+      "detail": ".agents/scripts/lint-hook.sh"
+    },
+    {
+      "id": "agents-path:buf.yaml",
+      "status": "pass",
+      "detail": "buf.yaml"
+    },
+    {
+      "id": "agents-path:buf.gen.yaml",
+      "status": "pass",
+      "detail": "buf.gen.yaml"
+    },
+    {
+      "id": "agents-path:firebase.json",
+      "status": "pass",
+      "detail": "firebase.json"
+    },
+    {
+      "id": "json:agents-hooks",
+      "status": "pass",
+      "detail": ".agents/hooks.json"
+    },
+    {
+      "id": "hook:lint-path",
+      "status": "fail",
+      "detail": "hooks.json uses ./scripts/lint-hook.sh but script is at .agents/scripts/lint-hook.sh"
+    },
+    {
+      "id": "secrets:harness",
+      "status": "pass",
+      "detail": "no obvious secret patterns in .agents/.cursor"
+    }
+  ],
+  "command_checks": [
+    {
+      "name": "go-fix",
+      "command": "bash -lc cd \"/workspace/server\" && go fix ./...",
+      "exit_code": 0,
+      "elapsed_ms": 331,
+      "output_tail": ""
+    },
+    {
+      "name": "go-vet",
+      "command": "bash -lc cd \"/workspace/server\" && go vet ./...",
+      "exit_code": 0,
+      "elapsed_ms": 317,
+      "output_tail": ""
+    },
+    {
+      "name": "go-test",
+      "command": "bash -lc cd \"/workspace/server\" && go test ./...",
+      "exit_code": 0,
+      "elapsed_ms": 320,
+      "output_tail": "?   \tgithub.com/emahiro/qrurl/server\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/gen/proto/ping/v1\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/gen/proto/ping/v1/pingv1connect\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/gen/proto/qrurl/v1\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/gen/proto/qrurl/v1/qrurlv1connect\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/handler\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/infra/firestore\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/intercepter\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/lib\t[no test files] ok  \tgithub.com/emahiro/qrurl/server/lib/jwt\t(cached) ?   \tgithub.com/emahiro/qrurl/server/lib/line\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/lib/log\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/middleware\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/model\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/repository\t[no test files] ?   \tgithub.com/emahiro/qrurl/server/service\t[no test files]"
+    },
+    {
+      "name": "go-build",
+      "command": "bash -lc cd \"/workspace/server\" && go build -o /tmp/qrurl-harness main.go",
+      "exit_code": 0,
+      "elapsed_ms": 276,
+      "output_tail": ""
+    },
+    {
+      "name": "client-lint",
+      "command": "bash -lc cd \"/workspace/client\" && npm run lint",
+      "exit_code": 0,
+      "elapsed_ms": 263,
+      "output_tail": " > client@0.0.0 lint > biome lint src  Checked 9 files in 6ms. No fixes applied."
+    },
+    {
+      "name": "client-tsc",
+      "command": "bash -lc cd \"/workspace/client\" && npx tsc --noEmit",
+      "exit_code": 0,
+      "elapsed_ms": 437,
+      "output_tail": ""
+    },
+    {
+      "name": "client-build",
+      "command": "bash -lc cd \"/workspace/client\" && npm run build",
+      "exit_code": 0,
+      "elapsed_ms": 720,
+      "output_tail": " > client@0.0.0 build > tsc && vite build  vite v8.3.5 building client environment for production... transforming... ✓ 157 modules transformed. rendering chunks... computing gzip size... dist/index.html                            2.80 kB │ gzip:   0.99 kB dist/assets/sp_qr_code_man-CyMfPHAy.png  134.55 kB dist/assets/index-xEFMjQiZ.css            21.82 kB │ gzip:   4.96 kB dist/assets/index-SXSkdrhV.js            343.65 kB │ gzip: 102.93 kB  ✓ built in 205ms"
+    },
+    {
+      "name": "buf-lint",
+      "command": "bash -lc cd \"/workspace\" && \"/workspace/client/node_modules/.bin/buf\" lint",
+      "exit_code": 0,
+      "elapsed_ms": 263,
+      "output_tail": ""
+    }
+  ]
+}

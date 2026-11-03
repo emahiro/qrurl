@@ -1,17 +1,17 @@
 module github.com/emahiro/qrurl/server
 
-go 1.27
+go 1.27.3
 
 require (
 	cloud.google.com/go/firestore v1.25.0
-	connectrpc.com/connect v1.21.0
+	connectrpc.com/connect v1.21.1
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/cockroachdb/errors v1.14.0
 	github.com/lestrrat-go/jwx/v3 v3.3.0
 	github.com/line/line-bot-sdk-go/v8 v8.22.0
 	github.com/makiuchi-d/gozxing v0.1.2-0.20230218072048-d8563176fedd
 	github.com/rs/cors v1.11.1
-	golang.org/x/net v0.59.0
+	golang.org/x/net v0.60.0
 	google.golang.org/api v0.298.0
 	google.golang.org/protobuf v1.36.12
 )

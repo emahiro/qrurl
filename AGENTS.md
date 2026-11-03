@@ -133,3 +133,4 @@ buf generate                 # Go / TypeScript コードの再生成
   - 中〜大規模な変更やアーキテクチャ見直しの際は、`memory/plans/plan-YYYYMMDD-{slug}.md` に計画書を作成・追跡する。
 - **Lifecycle Hooks**:
   - `.agents/hooks.json` により、ファイル編集（`write_to_file`, `replace_file_content`）後に `.agents/scripts/lint-hook.sh` が自動起動し、Go（`go fix`, `gofmt`, `goimports`, `go vet`）および Client（`biome check --write`）の自動フォーマット・検証を実行する。
+- **Harness 評価**: ルートで `make harness-eval`（または `./harness-eval/run.sh`）を実行し、ドキュメント・フック・品質ゲートコマンドの整合性を確認する。結果は `harness-eval/REPORT.md` と `harness-eval/baseline.json` との差分で追跡する。

@@ -202,8 +202,8 @@ if [[ -f "$BASELINE" ]]; then
        static_improvements: [($b.static_checks // [])[] | select(.status=="fail") | .id as $id | ($c.static_checks // [])[] | select(.id==$id and .status=="pass") | .id],
        command_regressions: [($b.command_checks // [])[] | select(.exit_code==0) | .name as $n | ($c.command_checks // [])[] | select(.name==$n and .exit_code!=0) | .name],
        command_improvements: [($b.command_checks // [])[] | select(.exit_code!=0) | .name as $n | ($c.command_checks // [])[] | select(.name==$n and .exit_code==0) | .name],
-       new_static_ids: [($c.static_checks // [])[] | .id] - [($b.static_checks // [])[] | .id],
-       new_command_names: [($c.command_checks // [])[] | .name] - [($b.command_checks // [])[] | .name]
+       new_static_ids: ([($c.static_checks // [])[] | .id] - [($b.static_checks // [])[] | .id]),
+       new_command_names: ([($c.command_checks // [])[] | .name] - [($b.command_checks // [])[] | .name])
      }')"
 fi
 
